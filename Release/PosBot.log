@@ -1,0 +1,32 @@
+﻿  PosBot.cpp
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(102,47): warning C4244: 'argument': conversion from 'double' to 'const _Ty', possible loss of data
+          with
+          [
+              _Ty=float
+          ]
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(106,14): warning C4018: '>': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(153,38): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(154,38): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(155,38): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(156,38): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(157,38): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(327,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(328,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(329,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(332,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(333,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(334,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(503,43): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(504,43): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(505,43): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(506,43): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(507,43): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(510,30): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(511,30): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(512,30): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(513,30): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(514,30): warning C4018: '<': signed/unsigned mismatch
+LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:ICF' specification
+LINK : warning LNK4098: defaultlib 'LIBCMTD' conflicts with use of other libs; use /NODEFAULTLIB:library
+  PosBot.vcxproj -> C:\Users\Harry\Desktop\PosBot\Release\PosBot.dll
+          1 file(s) copied.
