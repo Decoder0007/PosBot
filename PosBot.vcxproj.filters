@@ -16,17 +16,17 @@
     <Filter Include="Header Files\cocos2d">
       <UniqueIdentifier>{53fe1fca-e9f6-4c20-933a-86b685a26920}</UniqueIdentifier>
     </Filter>
-    <Filter Include="libs">
-      <UniqueIdentifier>{57386183-5038-48f6-8f3f-db48549cc929}</UniqueIdentifier>
-    </Filter>
     <Filter Include="imgui">
-      <UniqueIdentifier>{8addf2d0-0861-4d63-865e-0000d2a48912}</UniqueIdentifier>
+      <UniqueIdentifier>{7bfb1ab4-9168-47b0-abb7-4b5c617f764d}</UniqueIdentifier>
     </Filter>
     <Filter Include="imgui\imgui">
-      <UniqueIdentifier>{807144bf-d995-4473-8cfb-28ce4696ca3a}</UniqueIdentifier>
+      <UniqueIdentifier>{e2173829-ef5e-474c-af24-329b2f92de0b}</UniqueIdentifier>
     </Filter>
     <Filter Include="imgui\imgui\backends">
-      <UniqueIdentifier>{f797dbfb-53cf-42dc-b085-dbea39fa81b1}</UniqueIdentifier>
+      <UniqueIdentifier>{e6c61819-ed90-4e72-83fc-fff89baf120d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs">
+      <UniqueIdentifier>{57386183-5038-48f6-8f3f-db48549cc929}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -406,9 +406,6 @@
       <Filter>Header Files\cocos2d</Filter>
     </ClInclude>
     <ClInclude Include="cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\libwebp\types.h">
-      <Filter>Header Files\cocos2d</Filter>
-    </ClInclude>
-    <ClInclude Include="cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES\GL\glew.h">
       <Filter>Header Files\cocos2d</Filter>
     </ClInclude>
     <ClInclude Include="cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES\GL\glxew.h">
@@ -1164,6 +1161,21 @@
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine.h">
       <Filter>Header Files\cocos2d</Filter>
     </ClInclude>
+    <ClInclude Include="src\framework.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MinHook.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PosBot.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES\GL\glew.h">
+      <Filter>Header Files\cocos2d</Filter>
+    </ClInclude>
     <ClInclude Include="imgui\imgui-hook.hpp">
       <Filter>imgui</Filter>
     </ClInclude>
@@ -1193,18 +1205,6 @@
     </ClInclude>
     <ClInclude Include="imgui\imgui\backends\imgui_impl_win32.h">
       <Filter>imgui\imgui\backends</Filter>
-    </ClInclude>
-    <ClInclude Include="src\framework.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MinHook.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pch.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PosBot.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1253,6 +1253,15 @@
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\kazmath\src\vec4.c">
       <Filter>Header Files\cocos2d</Filter>
     </ClCompile>
+    <ClCompile Include="src\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PosBot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="imgui\imgui-hook.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -1277,22 +1286,16 @@
     <ClCompile Include="imgui\imgui\backends\imgui_impl_win32.cpp">
       <Filter>imgui\imgui\backends</Filter>
     </ClCompile>
-    <ClCompile Include="src\dllmain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\PosBot.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="Libs\libMinHook-x86-v141-mtd.lib">
-      <Filter>libs</Filter>
+      <Filter>Libs</Filter>
     </Library>
-    <Library Include="Libs\hackpro.lib">
-      <Filter>libs</Filter>
+    <Library Include="Libs\glew32.lib">
+      <Filter>Libs</Filter>
+    </Library>
+    <Library Include="Libs\opengl32.lib">
+      <Filter>Libs</Filter>
     </Library>
   </ItemGroup>
 </Project>

@@ -3,8 +3,8 @@
 #include "MinHook.h"
 #include "gd.h"
 #include <fstream>
-#include <imgui.h>
-#include "imgui_impl_opengl3.h"
+#include "imgui-hook.hpp"
+#include "imgui.h"
 #include <deque>
 #include <fstream>
 #include <direct.h>

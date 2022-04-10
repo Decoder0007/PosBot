@@ -4,12 +4,6 @@ C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(102,47): warning C4244: 'argument':
           [
               _Ty=float
           ]
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(106,14): warning C4018: '>': signed/unsigned mismatch
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(153,38): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(154,38): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(155,38): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(156,38): warning C4018: '<': signed/unsigned mismatch
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(157,38): warning C4018: '<': signed/unsigned mismatch
 C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(327,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(328,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
 C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(329,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data

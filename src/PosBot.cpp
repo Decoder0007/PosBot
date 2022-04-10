@@ -103,7 +103,7 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 			}
 		}
 		else if (mode == "Playback") {
-			if (frame > Xpos.size()) {
+			if ((int)Xpos.size() < frame) {
 				frame--;
 				if (!showedMacroComplete) {
 					CCMenu* macroCompleteMenu = CCMenu::create();
@@ -150,11 +150,11 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 	else {
 		if (Checkpoints.size() == 0) { Checkpoints.insert(Checkpoints.begin(), 0); }
 
-		while (1) { if (Checkpoints.back() < (Xpos.size() + 1)) { if (Xpos.size() != 0) { Xpos.pop_back(); } else { break; } } else { break; } }
-		while (1) { if (Checkpoints.back() < (Ypos.size() + 1)) { if (Ypos.size() != 0) { Ypos.pop_back(); } else { break; } } else { break; } }
-		while (1) { if (Checkpoints.back() < (Rotation.size() + 1)) { if (Rotation.size() != 0) { Rotation.pop_back(); } else { break; } } else { break; } }
-		while (1) { if (Checkpoints.back() < (Pushed.size() + 1)) { if (Pushed.size() != 0) { Pushed.pop_back(); } else { break; } } else { break; } }
-		while (1) { if (Checkpoints.back() < (YVelo.size() + 1)) { if (YVelo.size() != 0) { YVelo.pop_back(); } else { break; } } else { break; } }
+		while (1) { if ((int)Checkpoints.back() < (int)(Xpos.size() + 1)) { if (Xpos.size() != 0) { Xpos.pop_back(); } else { break; } } else { break; } }
+		while (1) { if ((int)Checkpoints.back() < (int)(Ypos.size() + 1)) { if (Ypos.size() != 0) { Ypos.pop_back(); } else { break; } } else { break; } }
+		while (1) { if ((int)Checkpoints.back() < (int)(Rotation.size() + 1)) { if (Rotation.size() != 0) { Rotation.pop_back(); } else { break; } } else { break; } }
+		while (1) { if ((int)Checkpoints.back() < (int)(Pushed.size() + 1)) { if (Pushed.size() != 0) { Pushed.pop_back(); } else { break; } } else { break; } }
+		while (1) { if ((int)Checkpoints.back() < (int)(YVelo.size() + 1)) { if (YVelo.size() != 0) { YVelo.pop_back(); } else { break; } } else { break; } }
 
 		if (Checkpoints.back() != 0) { frame = Checkpoints.back(); }
 		else { 
@@ -396,7 +396,7 @@ void PosBot::RenderGUI() {
 	// Render the UI
 	if (showUI) {
 		if (ImGui::Begin("PosBot", nullptr, window_flags)) {
-			ImGui::Text("PosBot v1.0.0");
+			ImGui::Text("PosBot v1.1");
 
 			if (!inLevel) {
 				// Do this if you aren't in a level

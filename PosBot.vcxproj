@@ -583,8 +583,9 @@
     <ClCompile Include="src\PosBot.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="Libs\hackpro.lib" />
+    <Library Include="Libs\glew32.lib" />
     <Library Include="Libs\libMinHook-x86-v141-mtd.lib" />
+    <Library Include="Libs\opengl32.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -44,7 +44,7 @@ void __fastcall CCEGLView_swapBuffers_H(CCEGLView* self) {
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     
-    //glFlush();
+    glFlush();
 
     CCEGLView_swapBuffers(self);
 }
