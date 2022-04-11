@@ -8,6 +8,7 @@
 #include <deque>
 #include <fstream>
 #include <direct.h>
+#include <variant>
 
 using namespace cocos2d;
 
