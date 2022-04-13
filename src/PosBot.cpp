@@ -7,7 +7,8 @@ const char* mode = "Record";
 const char* selectedMode = "Record";
 int frame = 0;
 bool inLevel = false;
-bool mouseDown = false;
+bool mouse1Down = false;
+bool mouse2Down = false;
 bool waitForFirstClick = false;
 bool showedMacroComplete = false;
 static char macroName[30] = "";
@@ -56,7 +57,7 @@ std::map<int, const char*> Keys = {
 	{KEY_Z, "Z"}
 };
 
-std::map<std::string, std::variant<std::deque<float>, std::deque<bool>, std::deque<int>>> PlayerData = {
+std::map<std::string, std::variant<std::deque<float>, std::deque<bool>, std::deque<int>>> Player1Data = {
 	{"Xpos", std::deque<float>{}},
 	{"Ypos", std::deque<float>{}},
 	{"Rotation", std::deque<float>{}},
@@ -65,17 +66,31 @@ std::map<std::string, std::variant<std::deque<float>, std::deque<bool>, std::deq
 	{"Yvelo", std::deque<float>{}}
 };
 
+std::map<std::string, std::variant<std::deque<float>, std::deque<bool>, std::deque<int>>> Player2Data = {
+	{"Xpos", std::deque<float>{}},
+	{"Ypos", std::deque<float>{}},
+	{"Rotation", std::deque<float>{}},
+	{"Pushed", std::deque<bool>{}},
+	{"Yvelo", std::deque<float>{}}
+};
+
 bool __fastcall PlayLayer::initHook(gd::PlayLayer* self, int edx, gd::GJGameLevel* level) {
 	bool ret = PlayLayer::init(self, level);
 	if (!ret) { return ret; }
 	frame = 0;
 	maxFrame = 0;
-	std::get<std::deque<float>>(PlayerData["Xpos"]).clear();
-	std::get<std::deque<float>>(PlayerData["Ypos"]).clear();
-	std::get<std::deque<float>>(PlayerData["Rotation"]).clear();
-	std::get<std::deque<bool>>(PlayerData["Pushed"]).clear();
-	std::get<std::deque<int>>(PlayerData["Checkpoints"]).clear();
-	std::get<std::deque<float>>(PlayerData["Yvelo"]).clear();
+	std::get<std::deque<float>>(Player1Data["Xpos"]).clear();
+	std::get<std::deque<float>>(Player1Data["Ypos"]).clear();
+	std::get<std::deque<float>>(Player1Data["Rotation"]).clear();
+	std::get<std::deque<bool>>(Player1Data["Pushed"]).clear();
+	std::get<std::deque<int>>(Player1Data["Checkpoints"]).clear();
+	std::get<std::deque<float>>(Player1Data["Yvelo"]).clear();
+	
+	std::get<std::deque<float>>(Player2Data["Xpos"]).clear();
+	std::get<std::deque<float>>(Player2Data["Ypos"]).clear();
+	std::get<std::deque<float>>(Player2Data["Rotation"]).clear();
+	std::get<std::deque<bool>>(Player2Data["Pushed"]).clear();
+	std::get<std::deque<float>>(Player2Data["Yvelo"]).clear();
 
 	inLevel = true;
 
@@ -95,15 +110,21 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 
 		if (mode == "Record") {
 			if (frame > 0) {
-				std::get<std::deque<float>>(PlayerData["Xpos"]).insert(std::get<std::deque<float>>(PlayerData["Xpos"]).end(), self->m_pPlayer1->m_position.x);
-				std::get<std::deque<float>>(PlayerData["Ypos"]).insert(std::get<std::deque<float>>(PlayerData["Ypos"]).end(), self->m_pPlayer1->m_position.y);
-				std::get<std::deque<float>>(PlayerData["Rotation"]).insert(std::get<std::deque<float>>(PlayerData["Rotation"]).end(), self->m_pPlayer1->getRotation());
-				std::get<std::deque<bool>>(PlayerData["Pushed"]).insert(std::get<std::deque<bool>>(PlayerData["Pushed"]).end(), mouseDown);
-				std::get<std::deque<float>>(PlayerData["Yvelo"]).insert(std::get<std::deque<float>>(PlayerData["Yvelo"]).end(), self->m_pPlayer1->m_yAccel);
+				std::get<std::deque<float>>(Player1Data["Xpos"]).insert(std::get<std::deque<float>>(Player1Data["Xpos"]).end(), self->m_pPlayer1->m_position.x);
+				std::get<std::deque<float>>(Player1Data["Ypos"]).insert(std::get<std::deque<float>>(Player1Data["Ypos"]).end(), self->m_pPlayer1->m_position.y);
+				std::get<std::deque<float>>(Player1Data["Rotation"]).insert(std::get<std::deque<float>>(Player1Data["Rotation"]).end(), self->m_pPlayer1->getRotation());
+				std::get<std::deque<bool>>(Player1Data["Pushed"]).insert(std::get<std::deque<bool>>(Player1Data["Pushed"]).end(), mouse1Down);
+				std::get<std::deque<float>>(Player1Data["Yvelo"]).insert(std::get<std::deque<float>>(Player1Data["Yvelo"]).end(), self->m_pPlayer1->m_yAccel);
+				
+				std::get<std::deque<float>>(Player2Data["Xpos"]).insert(std::get<std::deque<float>>(Player2Data["Xpos"]).end(), self->m_pPlayer2->m_position.x);
+				std::get<std::deque<float>>(Player2Data["Ypos"]).insert(std::get<std::deque<float>>(Player2Data["Ypos"]).end(), self->m_pPlayer2->m_position.y);
+				std::get<std::deque<float>>(Player2Data["Rotation"]).insert(std::get<std::deque<float>>(Player2Data["Rotation"]).end(), self->m_pPlayer2->getRotation());
+				std::get<std::deque<bool>>(Player2Data["Pushed"]).insert(std::get<std::deque<bool>>(Player2Data["Pushed"]).end(), mouse2Down);
+				std::get<std::deque<float>>(Player2Data["Yvelo"]).insert(std::get<std::deque<float>>(Player2Data["Yvelo"]).end(), self->m_pPlayer2->m_yAccel);
 			}
 		}
 		else if (mode == "Playback") {
-			if ((int)std::get<std::deque<float>>(PlayerData["Xpos"]).size() < frame) {
+			if ((int)std::get<std::deque<float>>(Player1Data["Xpos"]).size() < frame) {
 				frame--;
 				if (!showedMacroComplete) {
 					CCMenu* macroCompleteMenu = CCMenu::create();
@@ -118,22 +139,36 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 				}
 			}
 			if (frame != 0) {
-				self->m_pPlayer1->m_position.x = std::get<std::deque<float>>(PlayerData["Xpos"])[frame - 1];
-				self->m_pPlayer1->m_position.y = std::get<std::deque<float>>(PlayerData["Ypos"])[frame - 1];
-				self->m_pPlayer1->setRotation(std::get<std::deque<float>>(PlayerData["Rotation"])[frame - 1]);
-				self->m_pPlayer1->m_yAccel = std::get<std::deque<float>>(PlayerData["Yvelo"])[frame - 1];
-				if (std::get<std::deque<bool>>(PlayerData["Pushed"])[frame - 1]) { PlayLayer::pushButton(self, 0, true); }
-				else { PlayLayer::releaseButton(self, 0, true); }
+				self->m_pPlayer1->m_position.x = std::get<std::deque<float>>(Player1Data["Xpos"])[frame - 1];
+				self->m_pPlayer1->m_position.y = std::get<std::deque<float>>(Player1Data["Ypos"])[frame - 1];
+				self->m_pPlayer1->setRotation(std::get<std::deque<float>>(Player1Data["Rotation"])[frame - 1]);
+				self->m_pPlayer1->m_yAccel = std::get<std::deque<float>>(Player1Data["Yvelo"])[frame - 1];
+				if (std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && !mouse1Down) { PlayLayer::pushButton(self, 0, true); mouse1Down = true; }
+				if (!std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && mouse1Down) { PlayLayer::releaseButton(self, 0, true); mouse1Down = false; }
+
+				self->m_pPlayer2->m_position.x = std::get<std::deque<float>>(Player2Data["Xpos"])[frame - 1];
+				self->m_pPlayer2->m_position.y = std::get<std::deque<float>>(Player2Data["Ypos"])[frame - 1];
+				self->m_pPlayer2->setRotation(std::get<std::deque<float>>(Player2Data["Rotation"])[frame - 1]);
+				self->m_pPlayer2->m_yAccel = std::get<std::deque<float>>(Player2Data["Yvelo"])[frame - 1];
+				if (std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && !mouse2Down) { PlayLayer::pushButton(self, 0, false); mouse2Down = true; }
+				if (!std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && mouse2Down) { PlayLayer::releaseButton(self, 0, false); mouse2Down = false; }
 			}
 		}
 	}
 	else {
-		self->m_pPlayer1->m_position.x = std::get<std::deque<float>>(PlayerData["Xpos"])[frame];
-		self->m_pPlayer1->m_position.y = std::get<std::deque<float>>(PlayerData["Ypos"])[frame];
-		self->m_pPlayer1->setRotation(std::get<std::deque<float>>(PlayerData["Rotation"])[frame]);
-		self->m_pPlayer1->m_yAccel = std::get<std::deque<float>>(PlayerData["Yvelo"])[frame];
-		if (std::get<std::deque<bool>>(PlayerData["Pushed"])[frame]) { PlayLayer::pushButton(self, 0, true); }
-		else { PlayLayer::releaseButton(self, 0, true); }
+		self->m_pPlayer1->m_position.x = std::get<std::deque<float>>(Player1Data["Xpos"])[frame];
+		self->m_pPlayer1->m_position.y = std::get<std::deque<float>>(Player1Data["Ypos"])[frame];
+		self->m_pPlayer1->setRotation(std::get<std::deque<float>>(Player1Data["Rotation"])[frame]);
+		self->m_pPlayer1->m_yAccel = std::get<std::deque<float>>(Player1Data["Yvelo"])[frame];
+		if (std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && !mouse1Down) { PlayLayer::pushButton(self, 0, true); mouse1Down = true; }
+		if (std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && mouse1Down) { PlayLayer::releaseButton(self, 0, true); mouse1Down = false; }
+
+		self->m_pPlayer2->m_position.x = std::get<std::deque<float>>(Player2Data["Xpos"])[frame];
+		self->m_pPlayer2->m_position.y = std::get<std::deque<float>>(Player2Data["Ypos"])[frame];
+		self->m_pPlayer2->setRotation(std::get<std::deque<float>>(Player2Data["Rotation"])[frame]);
+		self->m_pPlayer2->m_yAccel = std::get<std::deque<float>>(Player2Data["Yvelo"])[frame];
+		if (std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && !mouse2Down) { PlayLayer::pushButton(self, 0, false); mouse2Down = true; }
+		if (std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && mouse2Down) { PlayLayer::releaseButton(self, 0, false); mouse2Down = false; }
 	}
 }
 
@@ -148,7 +183,7 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 		if(mode == "Record") waitForFirstClick = true;
 	}
 	else {
-		if (std::get<std::deque<int>>(PlayerData["Checkpoints"]).size() == 0) { std::get<std::deque<int>>(PlayerData["Checkpoints"]).insert(std::get<std::deque<int>>(PlayerData["Checkpoints"]).begin(), 0); }
+		if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() == 0) { std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).begin(), 0); }
 
 		/*
 		Notation for this because if i get it wrong it fucks me up
@@ -158,13 +193,19 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 		Now the macro should work almost perfectly
 		*/
 
-		while ((int)std::get<std::deque<int>>(PlayerData["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(PlayerData["Xpos"]).size())) { if (std::get<std::deque<float>>(PlayerData["Xpos"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Xpos"]).pop_back(); } else { break; } };
-		while ((int)std::get<std::deque<int>>(PlayerData["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(PlayerData["Ypos"]).size())) { if (std::get<std::deque<float>>(PlayerData["Ypos"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Ypos"]).pop_back(); } else { break; } };
-		while ((int)std::get<std::deque<int>>(PlayerData["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(PlayerData["Rotation"]).size())) { if (std::get<std::deque<float>>(PlayerData["Rotation"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Rotation"]).pop_back(); } else { break; } };
-		while ((int)std::get<std::deque<int>>(PlayerData["Checkpoints"]).back() < (int)(std::get<std::deque<bool>>(PlayerData["Pushed"]).size())) { if (std::get<std::deque<bool>>(PlayerData["Pushed"]).size() != 0) { std::get<std::deque<bool>>(PlayerData["Pushed"]).pop_back(); } else { break; } };
-		while ((int)std::get<std::deque<int>>(PlayerData["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(PlayerData["Yvelo"]).size())) { if (std::get<std::deque<float>>(PlayerData["Yvelo"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Yvelo"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Xpos"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Ypos"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player1Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Rotation"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<bool>>(Player1Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Pushed"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player1Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Yvelo"]).pop_back(); } else { break; } };
+
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Xpos"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Ypos"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player2Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Rotation"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<bool>>(Player2Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Pushed"]).pop_back(); } else { break; } };
+		while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player2Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Yvelo"]).pop_back(); } else { break; } };
 		
-		if ((int)std::get<std::deque<int>>(PlayerData["Checkpoints"]).back() != 0) { frame = (int)std::get<std::deque<int>>(PlayerData["Checkpoints"]).back(); }
+		if ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() != 0) { frame = (int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back(); }
 		else { 
 			frame = 0;
 			maxFrame = 0;
@@ -173,17 +214,24 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 }
 
 bool __fastcall PlayLayer::pushButtonHook(gd::PlayLayer* self, uintptr_t, int state, bool player) {
-	mouseDown = true;
+	if (player) mouse1Down = true;
+	if (!player) mouse2Down = true;
 	if (mode == "Record" || mode == "Disabled") { PlayLayer::pushButton(self, state, player); }
 	if (mode == "Record") {
 		if (waitForFirstClick && !self->m_isPracticeMode) {
 			waitForFirstClick = false;
 			if (!rewinding) {
-				while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Xpos"]).size())) { if (std::get<std::deque<float>>(PlayerData["Xpos"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Xpos"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Ypos"]).size())) { if (std::get<std::deque<float>>(PlayerData["Ypos"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Ypos"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Rotation"]).size())) { if (std::get<std::deque<float>>(PlayerData["Rotation"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Rotation"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<bool>>(PlayerData["Pushed"]).size())) { if (std::get<std::deque<bool>>(PlayerData["Pushed"]).size() != 0) { std::get<std::deque<bool>>(PlayerData["Pushed"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Yvelo"]).size())) { if (std::get<std::deque<float>>(PlayerData["Yvelo"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Yvelo"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Xpos"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Ypos"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player1Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Rotation"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<bool>>(Player1Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Pushed"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player1Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Yvelo"]).pop_back(); } else { break; } };
+
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Xpos"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Ypos"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player2Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Rotation"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<bool>>(Player2Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Pushed"]).pop_back(); } else { break; } };
+				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player2Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Yvelo"]).pop_back(); } else { break; } };
 			}
 		}
 	}
@@ -191,7 +239,8 @@ bool __fastcall PlayLayer::pushButtonHook(gd::PlayLayer* self, uintptr_t, int st
 }
 
 bool __fastcall PlayLayer::releaseButtonHook(gd::PlayLayer* self, uintptr_t, int state, bool player) {
-	mouseDown = false;
+	if (player) mouse1Down = false;
+	if (!player) mouse2Down = false;
 	if (mode == "Record" || mode == "Disabled") { PlayLayer::releaseButton(self, state, player); }
 	return true;
 }
@@ -203,13 +252,13 @@ void __fastcall PlayLayer::onQuitHook(gd::PlayLayer* self) {
 
 int __fastcall PlayLayer::createCheckpointHook(gd::PlayLayer* self) {
 	auto ret = PlayLayer::createCheckpoint(self);
-	std::get<std::deque<int>>(PlayerData["Checkpoints"]).insert(std::get<std::deque<int>>(PlayerData["Checkpoints"]).end(), frame);
+	std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
 	return ret;
 }
 
 int __fastcall PlayLayer::removeCheckpointHook(gd::PlayLayer* self) {
 	auto ret = PlayLayer::removeCheckpoint(self);
-	if (std::get<std::deque<int>>(PlayerData["Checkpoints"]).size() > 0) std::get<std::deque<int>>(PlayerData["Checkpoints"]).pop_back();
+	if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
 	return ret;
 }
 
@@ -224,16 +273,27 @@ void PosBot::SaveMacro(std::string macroName) {
 	std::fstream myfile;
 	myfile.open("PosBot/" + macroName + ".pbor", std::ios::out);
 	if (myfile.is_open()) {
-		myfile << std::get<std::deque<float>>(PlayerData["Xpos"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(PlayerData["Ypos"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(PlayerData["Rotation"]).size() << "\n";
-		myfile << std::get<std::deque<bool>>(PlayerData["Pushed"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(PlayerData["Yvelo"]).size() << "\n";
-		for (float xpos : std::get<std::deque<float>>(PlayerData["Xpos"])) myfile << std::setprecision(10) << std::fixed << xpos << "\n";
-		for (float ypos : std::get<std::deque<float>>(PlayerData["Ypos"])) myfile << std::setprecision(10) << std::fixed << ypos << "\n";
-		for (float rotation : std::get<std::deque<float>>(PlayerData["Rotation"])) myfile << std::setprecision(10) << std::fixed << rotation << "\n";
-		for (bool pushed : std::get<std::deque<bool>>(PlayerData["Pushed"])) myfile << pushed << "\n";
-		for (float yvelo : std::get<std::deque<float>>(PlayerData["Yvelo"])) myfile << std::setprecision(10) << std::fixed << yvelo << "\n";
+		myfile << std::get<std::deque<float>>(Player1Data["Xpos"]).size() << "\n";
+		myfile << std::get<std::deque<float>>(Player1Data["Ypos"]).size() << "\n";
+		myfile << std::get<std::deque<float>>(Player1Data["Rotation"]).size() << "\n";
+		myfile << std::get<std::deque<bool>>(Player1Data["Pushed"]).size() << "\n";
+		myfile << std::get<std::deque<float>>(Player1Data["Yvelo"]).size() << "\n";
+		for (float xpos : std::get<std::deque<float>>(Player1Data["Xpos"])) myfile << std::setprecision(10) << std::fixed << xpos << "\n";
+		for (float ypos : std::get<std::deque<float>>(Player1Data["Ypos"])) myfile << std::setprecision(10) << std::fixed << ypos << "\n";
+		for (float rotation : std::get<std::deque<float>>(Player1Data["Rotation"])) myfile << std::setprecision(10) << std::fixed << rotation << "\n";
+		for (bool pushed : std::get<std::deque<bool>>(Player1Data["Pushed"])) myfile << pushed << "\n";
+		for (float yvelo : std::get<std::deque<float>>(Player1Data["Yvelo"])) myfile << std::setprecision(10) << std::fixed << yvelo << "\n";
+		
+		myfile << std::get<std::deque<float>>(Player2Data["Xpos"]).size() << "\n";
+		myfile << std::get<std::deque<float>>(Player2Data["Ypos"]).size() << "\n";
+		myfile << std::get<std::deque<float>>(Player2Data["Rotation"]).size() << "\n";
+		myfile << std::get<std::deque<bool>>(Player2Data["Pushed"]).size() << "\n";
+		myfile << std::get<std::deque<float>>(Player2Data["Yvelo"]).size() << "\n";
+		for (float xpos : std::get<std::deque<float>>(Player2Data["Xpos"])) myfile << std::setprecision(10) << std::fixed << xpos << "\n";
+		for (float ypos : std::get<std::deque<float>>(Player2Data["Ypos"])) myfile << std::setprecision(10) << std::fixed << ypos << "\n";
+		for (float rotation : std::get<std::deque<float>>(Player2Data["Rotation"])) myfile << std::setprecision(10) << std::fixed << rotation << "\n";
+		for (bool pushed : std::get<std::deque<bool>>(Player2Data["Pushed"])) myfile << pushed << "\n";
+		for (float yvelo : std::get<std::deque<float>>(Player2Data["Yvelo"])) myfile << std::setprecision(10) << std::fixed << yvelo << "\n";
 		myfile.close();
 	}
 }
@@ -242,12 +302,18 @@ void PosBot::LoadMacro(std::string macroName) {
 	std::fstream myfile;
 	std::string line;
 	myfile.open(("PosBot/" + macroName + ".pbor"), std::ios::in);
-	std::get<std::deque<float>>(PlayerData["Xpos"]).clear();
-	std::get<std::deque<float>>(PlayerData["Ypos"]).clear();
-	std::get<std::deque<float>>(PlayerData["Rotation"]).clear();
-	std::get<std::deque<bool>>(PlayerData["Pushed"]).clear();
-	std::get<std::deque<int>>(PlayerData["Checkpoints"]).clear();
-	std::get<std::deque<float>>(PlayerData["Yvelo"]).clear();
+	std::get<std::deque<float>>(Player1Data["Xpos"]).clear();
+	std::get<std::deque<float>>(Player1Data["Ypos"]).clear();
+	std::get<std::deque<float>>(Player1Data["Rotation"]).clear();
+	std::get<std::deque<bool>>(Player1Data["Pushed"]).clear();
+	std::get<std::deque<int>>(Player1Data["Checkpoints"]).clear();
+	std::get<std::deque<float>>(Player1Data["Yvelo"]).clear();
+	
+	std::get<std::deque<float>>(Player2Data["Xpos"]).clear();
+	std::get<std::deque<float>>(Player2Data["Ypos"]).clear();
+	std::get<std::deque<float>>(Player2Data["Rotation"]).clear();
+	std::get<std::deque<bool>>(Player2Data["Pushed"]).clear();
+	std::get<std::deque<float>>(Player2Data["Yvelo"]).clear();
 	
 	if (myfile.is_open()) {
 		getline(myfile, line);
@@ -260,12 +326,28 @@ void PosBot::LoadMacro(std::string macroName) {
 		int PushedLines = stoi(line);
 		getline(myfile, line);
 		int YVeloLines = stoi(line);
-		for (int lineno = 1; lineno <= XposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(PlayerData["Xpos"]).insert(std::get<std::deque<float>>(PlayerData["Xpos"]).end(), stof(line)); }
-		for (int lineno = 1; lineno <= YposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(PlayerData["Ypos"]).insert(std::get<std::deque<float>>(PlayerData["Ypos"]).end(), stof(line)); }
-		for (int lineno = 1; lineno <= RotationLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(PlayerData["Rotation"]).insert(std::get<std::deque<float>>(PlayerData["Rotation"]).end(), stof(line)); }
+		for (int lineno = 1; lineno <= XposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Xpos"]).insert(std::get<std::deque<float>>(Player1Data["Xpos"]).end(), stof(line)); }
+		for (int lineno = 1; lineno <= YposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Ypos"]).insert(std::get<std::deque<float>>(Player1Data["Ypos"]).end(), stof(line)); }
+		for (int lineno = 1; lineno <= RotationLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Rotation"]).insert(std::get<std::deque<float>>(Player1Data["Rotation"]).end(), stof(line)); }
 		bool b;
-		for (int lineno = 1; lineno <= PushedLines; lineno++) { getline(myfile, line); std::stringstream(line) >> b; std::get<std::deque<bool>>(PlayerData["Pushed"]).insert(std::get<std::deque<bool>>(PlayerData["Pushed"]).end(), b); }
-		for (int lineno = 1; lineno <= YVeloLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(PlayerData["Yvelo"]).insert(std::get<std::deque<float>>(PlayerData["Yvelo"]).end(), stof(line)); }
+		for (int lineno = 1; lineno <= PushedLines; lineno++) { getline(myfile, line); std::stringstream(line) >> b; std::get<std::deque<bool>>(Player1Data["Pushed"]).insert(std::get<std::deque<bool>>(Player1Data["Pushed"]).end(), b); }
+		for (int lineno = 1; lineno <= YVeloLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Yvelo"]).insert(std::get<std::deque<float>>(Player1Data["Yvelo"]).end(), stof(line)); }
+		
+		getline(myfile, line);
+		XposLines = stoi(line);
+		getline(myfile, line);
+		YposLines = stoi(line);
+		getline(myfile, line);
+		RotationLines = stoi(line);
+		getline(myfile, line);
+		PushedLines = stoi(line);
+		getline(myfile, line);
+		YVeloLines = stoi(line);
+		for (int lineno = 1; lineno <= XposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Xpos"]).insert(std::get<std::deque<float>>(Player2Data["Xpos"]).end(), stof(line)); }
+		for (int lineno = 1; lineno <= YposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Ypos"]).insert(std::get<std::deque<float>>(Player2Data["Ypos"]).end(), stof(line)); }
+		for (int lineno = 1; lineno <= RotationLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Rotation"]).insert(std::get<std::deque<float>>(Player2Data["Rotation"]).end(), stof(line)); }
+		for (int lineno = 1; lineno <= PushedLines; lineno++) { getline(myfile, line); std::stringstream(line) >> b; std::get<std::deque<bool>>(Player2Data["Pushed"]).insert(std::get<std::deque<bool>>(Player2Data["Pushed"]).end(), b); }
+		for (int lineno = 1; lineno <= YVeloLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Yvelo"]).insert(std::get<std::deque<float>>(Player2Data["Yvelo"]).end(), stof(line)); }
 		myfile.close();
 	}
 }
@@ -310,13 +392,6 @@ void PosBot::RenderGUI() {
 
 	// Loading stuff
 	if (!fontadded) {
-		/*
-		Set the window pos and size.
-		These are based off my imgui.ini
-		After I resized it with resize on.
-		*/
-		ImGui::SetWindowPos("PosBot", ImVec2(988, 10));
-		ImGui::SetWindowSize("PosBot", ImVec2(421, 443));
 
 		// Load the font
 		fontadded = true;
@@ -398,7 +473,8 @@ void PosBot::RenderGUI() {
 	// Render the UI
 	if (showUI) {
 		if (ImGui::Begin("PosBot", nullptr, window_flags)) {
-			ImGui::Text("PosBot v1.2");
+			ImGui::SetWindowSize("PosBot", ImVec2(421, 443));
+			ImGui::Text("PosBot v1.3");
 
 			if (!inLevel) {
 				// Do this if you aren't in a level
@@ -497,11 +573,17 @@ void PosBot::RenderGUI() {
 					}
 					ImGui::SameLine();
 					if (ImGui::Button("Confirm")) {
-						while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Xpos"]).size())) { if (std::get<std::deque<float>>(PlayerData["Xpos"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Xpos"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Ypos"]).size())) { if (std::get<std::deque<float>>(PlayerData["Ypos"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Ypos"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Rotation"]).size())) { if (std::get<std::deque<float>>(PlayerData["Rotation"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Rotation"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<bool>>(PlayerData["Pushed"]).size())) { if (std::get<std::deque<bool>>(PlayerData["Pushed"]).size() != 0) { std::get<std::deque<bool>>(PlayerData["Pushed"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(PlayerData["Yvelo"]).size())) { if (std::get<std::deque<float>>(PlayerData["Yvelo"]).size() != 0) { std::get<std::deque<float>>(PlayerData["Yvelo"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Xpos"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Ypos"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player1Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Rotation"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<bool>>(Player1Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Pushed"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player1Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Yvelo"]).pop_back(); } else { break; } };
+
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Xpos"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Ypos"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player2Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Rotation"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<bool>>(Player2Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Pushed"]).pop_back(); } else { break; } };
+						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player2Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Yvelo"]).pop_back(); } else { break; } };
 						maxFrame = frame;
 						rewinding = false;
 					}
