@@ -9,6 +9,8 @@
 #include <fstream>
 #include <direct.h>
 #include <variant>
+#include "FPSBypass.h"
+#include "FPSMultiplier.h"
 
 using namespace cocos2d;
 
@@ -55,4 +57,9 @@ namespace PosBot {
 	void mem_init();
 	void SaveMacro(std::string macroName);
 	void LoadMacro(std::string macroName);
+	void update(gd::PlayLayer* self, float deltaTime);
+	template<class T>
+	bool Write(uint32_t vaddress, const T& value) {
+		return WriteProcessMemory(GetCurrentProcess(), reinterpret_cast<void*>(vaddress), &value, sizeof(T), NULL);
+	}
 }

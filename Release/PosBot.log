@@ -1,20 +1,26 @@
 ﻿  PosBot.cpp
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(117,135): warning C4244: 'argument': conversion from 'double' to 'const _Ty', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(207,135): warning C4244: 'argument': conversion from 'double' to 'const _Ty', possible loss of data
           with
           [
               _Ty=float
           ]
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(123,135): warning C4244: 'argument': conversion from 'double' to 'const _Ty', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(214,135): warning C4244: 'argument': conversion from 'double' to 'const _Ty', possible loss of data
           with
           [
               _Ty=float
           ]
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(404,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(405,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(406,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(409,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(410,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(411,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(279,11): warning C4244: 'argument': conversion from 'float' to 'DWORD', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(579,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(580,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(581,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(584,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(585,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(586,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(623,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(624,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(625,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(768,25): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(860,24): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
 LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:ICF' specification
 LINK : warning LNK4098: defaultlib 'LIBCMTD' conflicts with use of other libs; use /NODEFAULTLIB:library
   PosBot.vcxproj -> C:\Users\Harry\Desktop\PosBot\Release\PosBot.dll

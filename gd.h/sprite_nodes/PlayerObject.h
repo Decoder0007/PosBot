@@ -77,7 +77,7 @@ namespace gd {
 		PAD(32);
 		bool unk5FC;
 		bool unk5FD;
-		bool unk5FE;
+		bool m_bDropping; // 0x5FE Black Orb Clicked
 		PAD(17);
 		bool unk610;
 		bool m_isHolding; // 0x611

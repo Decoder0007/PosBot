@@ -549,6 +549,8 @@
     <ClInclude Include="imgui\imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imgui\imstb_truetype.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="src\FPSBypass.h" />
+    <ClInclude Include="src\FPSMultiplier.h" />
     <ClInclude Include="src\framework.h" />
     <ClInclude Include="src\MinHook.h" />
     <ClInclude Include="src\pch.h" />
@@ -579,6 +581,8 @@
     <ClCompile Include="imgui\imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\FPSBypass.cpp" />
+    <ClCompile Include="src\FPSMultiplier.cpp" />
     <ClCompile Include="src\pch.cpp" />
     <ClCompile Include="src\PosBot.cpp" />
   </ItemGroup>

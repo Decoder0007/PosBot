@@ -1206,6 +1206,12 @@
     <ClInclude Include="imgui\imgui\backends\imgui_impl_win32.h">
       <Filter>imgui\imgui\backends</Filter>
     </ClInclude>
+    <ClInclude Include="src\FPSBypass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FPSMultiplier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\ccFPSImages.c">
@@ -1285,6 +1291,12 @@
     </ClCompile>
     <ClCompile Include="imgui\imgui\backends\imgui_impl_win32.cpp">
       <Filter>imgui\imgui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FPSBypass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FPSMultiplier.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
