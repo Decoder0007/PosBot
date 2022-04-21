@@ -1,5 +1,12 @@
 # PosBot
-- Better geometry dash bot
-- Beware of very large macro files
-- 99.93% accurate
-- Auto macro fix coming soon
+- 100% accurate
+- Dual Click (Click for both players with the mouse in 2 player mode)
+- Spam Mode
+- Frame Advance
+- Click Bot
+- RGB Menu
+- Integrated Speedhack
+- Advance Practice Fix
+- FPS Bypass with integrated multiplier
+- Speedhack Audio
+- Rewinding
