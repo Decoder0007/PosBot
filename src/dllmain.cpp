@@ -17,6 +17,9 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         PosBot::mem_init();
         ImGuiHook::setupHooks([](void* target, void* hook, void** trampoline) { MH_CreateHook(target, hook, trampoline); });
         ImGuiHook::setRenderFunction(PosBot::RenderGUI);
+        AllocConsole();
+        freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+        std::cout << "PosBot Initiated" << std::endl;
         MH_EnableHook(MH_ALL_HOOKS);
         break;
     case DLL_THREAD_ATTACH:

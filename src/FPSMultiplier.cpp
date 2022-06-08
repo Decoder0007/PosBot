@@ -1,7 +1,7 @@
 #include "FPSMultiplier.h"
 
 float g_target_fps = 240;
-bool g_enabled = true;
+bool g_enabled = false;
 bool g_disable_render = false;
 float g_left_over = 0.f;
 
@@ -29,6 +29,7 @@ void __fastcall PlayLayer_updateVisibility_H(void* self) {
 }
 
 void FPSMultiplierSetup() {
+    g_enabled = true;
 
     auto base = reinterpret_cast<uintptr_t>(GetModuleHandle(0));
     auto libcocos = GetModuleHandleA("libcocos2d.dll");
