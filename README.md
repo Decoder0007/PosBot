@@ -10,3 +10,5 @@
 - FPS Bypass with integrated multiplier
 - Speedhack Audio
 - Rewinding
+
+Thanks to Absolute for help with checkpoint fix
