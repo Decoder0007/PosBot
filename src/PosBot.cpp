@@ -776,7 +776,9 @@ void PosBot::RenderGUI() {
 						auto path = "PosBot/";
 						std::deque<std::string>Macros;
 						for (const auto& file : std::filesystem::directory_iterator(path)) {
-							Macros.insert(Macros.end(), file.path().filename().string());
+							if (file.is_regular_file()) {
+								Macros.insert(Macros.end(), file.path().filename().string());
+							}
 						}
 						for (int i = 0; i <= Macros.size() -1; i++) {
 							if (ImGui::Button(Macros.at(i).c_str(), ImVec2(405, 20))) {
