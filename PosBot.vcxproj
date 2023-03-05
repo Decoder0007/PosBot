@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -537,7 +537,6 @@
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\SlotData.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine-cocos2dx.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="imgui\imgui-hook.hpp" />
     <ClInclude Include="imgui\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\imgui\backends\imgui_impl_opengl3_loader.h" />
@@ -548,9 +547,7 @@
     <ClInclude Include="imgui\imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imgui\imstb_truetype.h" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="src\FPSBypass.h" />
-    <ClInclude Include="src\FPSMultiplier.h" />
     <ClInclude Include="src\framework.h" />
     <ClInclude Include="src\MinHook.h" />
     <ClInclude Include="src\pch.h" />
@@ -582,7 +579,6 @@
     <ClCompile Include="imgui\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\FPSBypass.cpp" />
-    <ClCompile Include="src\FPSMultiplier.cpp" />
     <ClCompile Include="src\pch.cpp" />
     <ClCompile Include="src\PosBot.cpp" />
   </ItemGroup>

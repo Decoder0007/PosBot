@@ -1,26 +1,29 @@
 ﻿  PosBot.cpp
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(214,135): warning C4244: 'argument': conversion from 'double' to 'const _Ty', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(250,49): warning C4244: 'argument': conversion from 'float' to 'GLubyte', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(284,135): warning C4244: 'argument': conversion from 'double' to '_Ty', possible loss of data
           with
           [
               _Ty=float
           ]
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(221,135): warning C4244: 'argument': conversion from 'double' to 'const _Ty', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(291,135): warning C4244: 'argument': conversion from 'double' to '_Ty', possible loss of data
           with
           [
               _Ty=float
           ]
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(592,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(593,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(594,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(597,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(598,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(599,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(636,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(637,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(638,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(781,25): warning C4018: '<=': signed/unsigned mismatch
-C:\Users\Harry\Desktop\PosBot\src\PosBot.cpp(874,24): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(672,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(673,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(674,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(677,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(678,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(679,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(716,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(717,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(718,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(861,25): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(951,24): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
 LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:ICF' specification
 LINK : warning LNK4098: defaultlib 'LIBCMTD' conflicts with use of other libs; use /NODEFAULTLIB:library
-  PosBot.vcxproj -> C:\Users\Harry\Desktop\PosBot\Release\PosBot.dll
-          1 file(s) copied.
+  PosBot.vcxproj -> C:\Users\decod\Desktop\PosBot\Release\PosBot.dll
+  The system cannot find the path specified.
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(159,5): error MSB3073: The command "copy "C:\Users\Harry\Desktop\PosBot\Release\PosBot.dll" "E:\Games\SteamGames\steamapps\common\Geometry Dash\extensions"
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(159,5): error MSB3073: :VCEnd" exited with code 1.

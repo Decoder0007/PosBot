@@ -30,12 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="cappuccino-sdk\incl\cocos2dx\actions\CCAction.h">
       <Filter>Header Files\cocos2d</Filter>
     </ClInclude>
@@ -1161,18 +1155,6 @@
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine.h">
       <Filter>Header Files\cocos2d</Filter>
     </ClInclude>
-    <ClInclude Include="src\framework.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\MinHook.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pch.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PosBot.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES\GL\glew.h">
       <Filter>Header Files\cocos2d</Filter>
     </ClInclude>
@@ -1209,7 +1191,16 @@
     <ClInclude Include="src\FPSBypass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\FPSMultiplier.h">
+    <ClInclude Include="src\framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MinHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PosBot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1293,9 +1284,6 @@
       <Filter>imgui\imgui\backends</Filter>
     </ClCompile>
     <ClCompile Include="src\FPSBypass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\FPSMultiplier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

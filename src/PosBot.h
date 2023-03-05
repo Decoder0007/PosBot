@@ -2,7 +2,6 @@
 #include <cocos2d.h>
 #include "MinHook.h"
 #include "gd.h"
-#include <fstream>
 #include "imgui-hook.hpp"
 #include "imgui.h"
 #include <deque>
@@ -10,9 +9,18 @@
 #include <direct.h>
 #include <variant>
 #include "FPSBypass.h"
-#include "FPSMultiplier.h"
 
 using namespace cocos2d;
+
+extern float g_target_fps;
+extern bool g_enabled;
+extern bool g_disable_render;
+extern float g_left_over;
+
+namespace Scheduler {
+	inline void(__thiscall* update)(CCScheduler*, float);
+	void __fastcall updateHook(CCScheduler* self, int, float dt);
+}
 
 namespace PlayLayer {
 	inline bool(__thiscall* init)(gd::PlayLayer* self, gd::GJGameLevel* GJGameLevel);
@@ -38,6 +46,12 @@ namespace PlayLayer {
 
 	inline int(__thiscall* removeCheckpoint)(gd::PlayLayer* self);
 	int __fastcall removeCheckpointHook(gd::PlayLayer* self);
+
+	inline void(__thiscall* togglePracticeMode)(gd::PlayLayer* self, bool toggle);
+	void __fastcall togglePracticeModeHook(gd::PlayLayer* self, int edx, bool toggle);
+
+	inline void(__thiscall* updateVisibility)(gd::PlayLayer* self);
+	void __fastcall updateVisibilityHook(gd::PlayLayer* self);
 }
 
 namespace LevelEditorLayer {
@@ -57,7 +71,6 @@ namespace PosBot {
 	void mem_init();
 	void SaveMacro(std::string macroName);
 	void LoadMacro(std::string macroName);
-	void update(gd::PlayLayer* self, float deltaTime);
 	template<class T>
 	bool Write(uint32_t vaddress, const T& value) {
 		return WriteProcessMemory(GetCurrentProcess(), reinterpret_cast<void*>(vaddress), &value, sizeof(T), NULL);

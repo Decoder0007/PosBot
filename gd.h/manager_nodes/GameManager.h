@@ -125,7 +125,10 @@ namespace gd {
 		PAD(3);
 		bool m_bGameCenterEnabled;
 		bool m_bSmoothFix;
-		PAD(16);
+		int m_ratePowerSeed;
+		int m_ratePowerRand;
+		int m_ratePower;
+		bool m_canGetLevelSaveData;
 		int m_nResolution;
 		cocos2d::TextureQuality m_eQuality; //more after that i havent re'd
 
