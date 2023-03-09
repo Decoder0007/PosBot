@@ -4,18 +4,19 @@
 #include "gd.h"
 #include "imgui-hook.hpp"
 #include "imgui.h"
-#include <deque>
-#include <fstream>
 #include <direct.h>
-#include <variant>
 #include "FPSBypass.h"
+#include "Speedhack.h"
+#include "Checkpoint.h"
+#include "Frame.h"
+#include <string>
+#include <fstream>
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <vector>
 
 using namespace cocos2d;
-
-extern float g_target_fps;
-extern bool g_enabled;
-extern bool g_disable_render;
-extern float g_left_over;
 
 namespace Scheduler {
 	inline void(__thiscall* update)(CCScheduler*, float);
@@ -49,9 +50,6 @@ namespace PlayLayer {
 
 	inline void(__thiscall* togglePracticeMode)(gd::PlayLayer* self, bool toggle);
 	void __fastcall togglePracticeModeHook(gd::PlayLayer* self, int edx, bool toggle);
-
-	inline void(__thiscall* updateVisibility)(gd::PlayLayer* self);
-	void __fastcall updateVisibilityHook(gd::PlayLayer* self);
 }
 
 namespace LevelEditorLayer {

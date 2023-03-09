@@ -110,7 +110,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)cappuccino-sdk\incl\cocos2dx;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\kazmath\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES;$(SolutionDir)cappuccino-sdk\incl\extensions;$(SolutionDir)src;$(SolutionDir)lib;$(SolutionDir)gd.h\;$(SolutionDir)gd.h\include;$(SolutionDir)imgui;$(SolutionDir)imgui\imgui;$(SolutionDir)imgui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)cappuccino-sdk\incl\cocos2dx;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\kazmath\include;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32;$(SolutionDir)cappuccino-sdk\incl\cocos2dx\platform\third_party\win32\OGLES;$(SolutionDir)cappuccino-sdk\incl\extensions;$(SolutionDir)src;$(SolutionDir)lib;$(SolutionDir)gd.h\;$(SolutionDir)gd.h\include;$(SolutionDir)imgui;$(SolutionDir)imgui\imgui;$(SolutionDir)imgui\imgui\backends;$(SolutionDir)src\Detours;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <OmitFramePointers />
     </ClCompile>
@@ -123,7 +123,7 @@
       <AdditionalDependencies>$(SolutionDir)cappuccino-sdk\lib\cappuccino.lib;$(SolutionDir)cappuccino-sdk\lib\libExtensions.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "C:\Users\Harry\Desktop\PosBot\Release\PosBot.dll" "E:\Games\SteamGames\steamapps\common\Geometry Dash\extensions"</Command>
+      <Command>copy "C:\Users\decod\Desktop\PosBot\Release\PosBot.dll" "D:\SteamLibrary\steamapps\common\Geometry Dash\extensions\PosBot.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -537,6 +537,7 @@
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\SlotData.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine-cocos2dx.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine.h" />
+    <ClInclude Include="Checkpoint.h" />
     <ClInclude Include="imgui\imgui-hook.hpp" />
     <ClInclude Include="imgui\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\imgui\backends\imgui_impl_opengl3_loader.h" />
@@ -548,10 +549,12 @@
     <ClInclude Include="imgui\imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imgui\imstb_truetype.h" />
     <ClInclude Include="src\FPSBypass.h" />
+    <ClInclude Include="src\Frame.h" />
     <ClInclude Include="src\framework.h" />
     <ClInclude Include="src\MinHook.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\PosBot.h" />
+    <ClInclude Include="src\Speedhack.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cappuccino-sdk\incl\cocos2dx\ccFPSImages.c" />
@@ -581,11 +584,13 @@
     <ClCompile Include="src\FPSBypass.cpp" />
     <ClCompile Include="src\pch.cpp" />
     <ClCompile Include="src\PosBot.cpp" />
+    <ClCompile Include="src\Speedhack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="Libs\glew32.lib" />
     <Library Include="Libs\libMinHook-x86-v141-mtd.lib" />
     <Library Include="Libs\opengl32.lib" />
+    <Library Include="src\Detours\detours.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

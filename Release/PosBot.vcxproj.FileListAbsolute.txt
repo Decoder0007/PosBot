@@ -1,1 +1,2 @@
 C:\Users\Harry\Desktop\PosBot\Release\PosBot.dll
+C:\Users\decod\Desktop\PosBot\Release\PosBot.dll

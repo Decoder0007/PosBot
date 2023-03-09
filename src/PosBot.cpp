@@ -47,12 +47,6 @@ float speed;
 bool initialized = false;
 bool EnableSpeedhackAudio = false;
 
-// Spinning Duck
-int duckFrame = 0;
-float duckFrameTime = 0;
-bool EnablePracticeDuck = false;
-int duckOpacity = 50;
-
 // Practice Fix
 bool EnablePracticeFix = false;
 
@@ -115,53 +109,21 @@ std::map<int, const char*> Keys = {
 	{KEY_Z, "Z"}
 };
 
-std::map<std::string, std::variant<std::deque<float>, std::deque<bool>, std::deque<int>>> Player1Data = {
-	{"Xpos", std::deque<float>{}},
-	{"Ypos", std::deque<float>{}},
-	{"Rotation", std::deque<float>{}},
-	{"Pushed", std::deque<bool>{}},
-	{"Checkpoints", std::deque<int>{}},
-	{"Yvelo", std::deque<float>{}},
-	{"Dropping", std::deque<bool>{}}
-};
+std::vector<Checkpoint> Checkpoints = {};
+std::vector<int> CheckpointFrames = {};
+std::vector<Frame> Frames = {};
 
-std::map<std::string, std::variant<std::deque<float>, std::deque<bool>, std::deque<int>>> Player2Data = {
-	{"Xpos", std::deque<float>{}},
-	{"Ypos", std::deque<float>{}},
-	{"Rotation", std::deque<float>{}},
-	{"Pushed", std::deque<bool>{}},
-	{"Yvelo", std::deque<float>{}},
-	{"Dropping", std::deque<bool>{}}
-};
-
-float g_target_fps = 240;
-bool g_enabled = false;
-bool g_disable_render = false;
-float g_left_over = 0.f;
+// Higher FPS = Lower DT
+// DT = 1 / fps
 
 void __fastcall Scheduler::updateHook(CCScheduler* self, int, float dt) {
 	if (!EnableFrameAdvance || (EnableFrameAdvance && Update)) {
 		Update = false;
-		if (!g_enabled)
-			return Scheduler::update(self, dt);
-		auto speedhack = self->getTimeScale();
-		const float newdt = 1.f / g_target_fps / speedhack;
-		g_disable_render = true;
-
-		const int times = min(static_cast<int>((dt + g_left_over) / newdt), 100); // limit it to 100x just in case
-		for (int i = 0; i < times; ++i) {
-			if (i == times - 1)
-				g_disable_render = false;
-			Scheduler::update(self, newdt);
-		}
-		g_left_over += dt - newdt * times;
+		float deltaTime = 1 / fpsbypassCap;
+		Scheduler::update(self, deltaTime);
+		return;
 	}
-}
-
-void __fastcall PlayLayer::updateVisibilityHook(gd::PlayLayer* self) {
-	if (!g_disable_render) {
-		PlayLayer::updateVisibility(self);
-	}
+	else return;
 }
 
 namespace SpeedhackAudio {
@@ -197,27 +159,12 @@ bool __fastcall PlayLayer::initHook(gd::PlayLayer* self, int edx, gd::GJGameLeve
 	bool ret = PlayLayer::init(self, level);
 	if (!ret) { return ret; }
 
-	auto Duck = CCSprite::create();
-	Duck->setTag(69420);
-	self->addChild(Duck);
-
 	frame = 0;
 	maxFrame = 0;
-	std::get<std::deque<float>>(Player1Data["Xpos"]).clear();
-	std::get<std::deque<float>>(Player1Data["Ypos"]).clear();
-	std::get<std::deque<float>>(Player1Data["Rotation"]).clear();
-	std::get<std::deque<bool>>(Player1Data["Pushed"]).clear();
-	std::get<std::deque<int>>(Player1Data["Checkpoints"]).clear();
-	std::get<std::deque<float>>(Player1Data["Yvelo"]).clear();
-	std::get<std::deque<bool>>(Player1Data["Dropping"]).clear(); // Thanks Absolute
-
-	std::get<std::deque<float>>(Player2Data["Xpos"]).clear();
-	std::get<std::deque<float>>(Player2Data["Ypos"]).clear();
-	std::get<std::deque<float>>(Player2Data["Rotation"]).clear();
-	std::get<std::deque<bool>>(Player2Data["Pushed"]).clear();
-	std::get<std::deque<float>>(Player2Data["Yvelo"]).clear();
-	std::get<std::deque<bool>>(Player2Data["Dropping"]).clear();
-
+	Frames.clear();
+	Checkpoints.clear();
+	CheckpointFrames.clear();
+	
 	inLevel = true;
 
 	return ret;
@@ -229,35 +176,8 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 
 	PlayLayer::update(self, deltaTime);
 
-	// Spinning duck
 	auto director = CCDirector::sharedDirector();
 	auto winSize = director->getWinSize();
-	if (EnablePracticeDuck) {
-		duckFrameTime += deltaTime;
-		if (duckFrameTime > 0.05) {
-			duckFrame++;
-			duckFrameTime = 0;
-			if (duckFrame == 29) { duckFrame = 0; }
-			if (self->m_isPracticeMode) {
-				self->removeChildByTag(69420);
-				std::string fileNamea = "PosBot/Duck/";
-				std::string fileNameb = std::to_string(duckFrame);
-				std::string fileNamec = ".png";
-				std::string fileName = fileNamea + fileNameb + fileNamec;
-				auto Duck = CCSprite::create(fileName.c_str());
-				Duck->setTag(69420);
-				Duck->setPosition({ winSize.width / 2, winSize.height / 2 });
-				Duck->setOpacity(((float)duckOpacity / 100) * 255);
-				Duck->setScale(3);
-				Duck->setZOrder(10000);
-				self->addChild(Duck);
-			}
-		}
-	}
-	if (!self->m_isPracticeMode || !EnablePracticeDuck) {
-		self->removeChildByTag(69420);
-	}
-
 
 	if (!rewinding) {
 
@@ -265,36 +185,21 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 		else { frame++; }
 
 		if (frame > maxFrame) { maxFrame = frame; }
-
+		
 		if (mode == "Record") {
 			if (frame > 0) {
 				if (EnableSpam) {
-					if (mouse1Down) PlayLayer::releaseButton(self, 0, true);
-					else PlayLayer::pushButton(self, 0, true);
-					if (mouse2Down) PlayLayer::releaseButton(self, 0, false);
-					else PlayLayer::pushButton(self, 0, false);
+
 				}
 
 				if (self->m_hasCompletedLevel) return;
-
-				std::get<std::deque<float>>(Player1Data["Xpos"]).insert(std::get<std::deque<float>>(Player1Data["Xpos"]).end(), self->m_pPlayer1->m_position.x);
-				std::get<std::deque<float>>(Player1Data["Ypos"]).insert(std::get<std::deque<float>>(Player1Data["Ypos"]).end(), self->m_pPlayer1->m_position.y);
-				std::get<std::deque<float>>(Player1Data["Rotation"]).insert(std::get<std::deque<float>>(Player1Data["Rotation"]).end(), self->m_pPlayer1->getRotation());
-				std::get<std::deque<bool>>(Player1Data["Pushed"]).insert(std::get<std::deque<bool>>(Player1Data["Pushed"]).end(), mouse1Down);
-				std::get<std::deque<float>>(Player1Data["Yvelo"]).insert(std::get<std::deque<float>>(Player1Data["Yvelo"]).end(), self->m_pPlayer1->m_yAccel);
-				std::get<std::deque<bool>>(Player1Data["Dropping"]).insert(std::get<std::deque<bool>>(Player1Data["Dropping"]).end(), self->m_pPlayer1->m_bDropping);
-
-				std::get<std::deque<float>>(Player2Data["Xpos"]).insert(std::get<std::deque<float>>(Player2Data["Xpos"]).end(), self->m_pPlayer2->m_position.x);
-				std::get<std::deque<float>>(Player2Data["Ypos"]).insert(std::get<std::deque<float>>(Player2Data["Ypos"]).end(), self->m_pPlayer2->m_position.y);
-				std::get<std::deque<float>>(Player2Data["Rotation"]).insert(std::get<std::deque<float>>(Player2Data["Rotation"]).end(), self->m_pPlayer2->getRotation());
-				std::get<std::deque<bool>>(Player2Data["Pushed"]).insert(std::get<std::deque<bool>>(Player2Data["Pushed"]).end(), mouse2Down);
-				std::get<std::deque<float>>(Player2Data["Yvelo"]).insert(std::get<std::deque<float>>(Player2Data["Yvelo"]).end(), self->m_pPlayer2->m_yAccel);
-				std::get<std::deque<bool>>(Player2Data["Dropping"]).insert(std::get<std::deque<bool>>(Player2Data["Dropping"]).end(), self->m_pPlayer2->m_bDropping);
+				Frame f = Frame::from(self);
+				if (Frames.size() > frame) Frames.resize(frame);
+				Frames.push_back(f);
 			}
 		}
 		else if (mode == "Playback") {
-			if ((int)std::get<std::deque<float>>(Player1Data["Xpos"]).size() < frame) {
-
+			if (Frames.size() < frame) {
 				frame--;
 				if (!showedMacroComplete) {
 					CCMenu* macroCompleteMenu = CCMenu::create();
@@ -306,64 +211,52 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 					CCFadeOut* fadeOut = CCFadeOut::create(2.0f);
 					macroComplete->runAction(fadeOut);
 					showedMacroComplete = true;
+					return;
 				}
 			}
 			if (self->m_hasCompletedLevel) return;
-			if (frame != 0) {
-				if (std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && !mouse1Down) {
-					PlayLayer::pushButton(self, 0, true);
+			if (frame != 0 && frame < Frames.size()) {
+				Frames[frame].restore(self);
+				if (Frames.at(frame).p1.is_holding && !mouse1Down) {
 					mouse1Down = true;
 					if (EnableFakeClicks && ClicksExist) {
+						PlayLayer::pushButton(self, 0, true);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Click.wav");
 					}
 				}
-				if (!std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && mouse1Down) {
-					PlayLayer::releaseButton(self, 0, true);
+				
+				if (!Frames[frame].p1.is_holding && mouse1Down) {
 					mouse1Down = false;
 					if (EnableFakeClicks && ClicksExist) {
+						PlayLayer::releaseButton(self, 0, true);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Release.wav");
 					}
 				}
-				self->m_pPlayer1->m_position.x = std::get<std::deque<float>>(Player1Data["Xpos"])[frame - 1];
-				self->m_pPlayer1->m_position.y = std::get<std::deque<float>>(Player1Data["Ypos"])[frame - 1];
-				self->m_pPlayer1->setRotation(std::get<std::deque<float>>(Player1Data["Rotation"])[frame - 1]);
-				self->m_pPlayer1->m_yAccel = std::get<std::deque<float>>(Player1Data["Yvelo"])[frame - 1];
-				if (std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && !mouse2Down) {
-					PlayLayer::pushButton(self, 0, false);
+				
+				if (Frames[frame].p2.is_holding && !mouse2Down) {
 					mouse2Down = true;
 					if (EnableFakeClicks && ClicksExist) {
+						PlayLayer::pushButton(self, 0, false);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Click.wav");
 					}
 				}
-				if (!std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && mouse2Down) {
-					PlayLayer::releaseButton(self, 0, false);
+				
+				if (!Frames[frame].p2.is_holding && mouse2Down) {
 					mouse2Down = false;
 					if (EnableFakeClicks && ClicksExist) {
+						PlayLayer::releaseButton(self, 0, false);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Release.wav");
 					}
 				}
-				self->m_pPlayer2->m_position.x = std::get<std::deque<float>>(Player2Data["Xpos"])[frame - 1];
-				self->m_pPlayer2->m_position.y = std::get<std::deque<float>>(Player2Data["Ypos"])[frame - 1];
-				self->m_pPlayer2->setRotation(std::get<std::deque<float>>(Player2Data["Rotation"])[frame - 1]);
-				self->m_pPlayer2->m_yAccel = std::get<std::deque<float>>(Player2Data["Yvelo"])[frame - 1];
-				
 			}
 		}
 	}
 	else {
-		self->m_pPlayer1->m_position.x = std::get<std::deque<float>>(Player1Data["Xpos"])[frame - 1];
-		self->m_pPlayer1->m_position.y = std::get<std::deque<float>>(Player1Data["Ypos"])[frame - 1];
-		self->m_pPlayer1->setRotation(std::get<std::deque<float>>(Player1Data["Rotation"])[frame - 1]);
-		self->m_pPlayer1->m_yAccel = std::get<std::deque<float>>(Player1Data["Yvelo"])[frame - 1];
-		if (std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && !mouse1Down) { PlayLayer::pushButton(self, 0, true); mouse1Down = true; }
-		if (!std::get<std::deque<bool>>(Player1Data["Pushed"])[frame] && mouse1Down) { PlayLayer::releaseButton(self, 0, true); mouse1Down = false; }
-
-		self->m_pPlayer2->m_position.x = std::get<std::deque<float>>(Player2Data["Xpos"])[frame - 1];
-		self->m_pPlayer2->m_position.y = std::get<std::deque<float>>(Player2Data["Ypos"])[frame - 1];
-		self->m_pPlayer2->setRotation(std::get<std::deque<float>>(Player2Data["Rotation"])[frame - 1]);
-		self->m_pPlayer2->m_yAccel = std::get<std::deque<float>>(Player2Data["Yvelo"])[frame - 1];
-		if (std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && !mouse2Down) { PlayLayer::pushButton(self, 0, false); mouse2Down = true; }
-		if (!std::get<std::deque<bool>>(Player2Data["Pushed"])[frame] && mouse2Down) { PlayLayer::releaseButton(self, 0, false); mouse2Down = false; }
+		Frames[frame].restore(self);
+		if (Frames[frame].p1.is_holding && !mouse1Down) { PlayLayer::pushButton(self, 0, true); mouse1Down = true; }
+		if (!Frames[frame].p1.is_holding && mouse1Down) { PlayLayer::releaseButton(self, 0, true); mouse1Down = false; }
+		if (Frames[frame].p2.is_holding && !mouse2Down) { PlayLayer::pushButton(self, 0, false); mouse2Down = true; }
+		if (!Frames[frame].p2.is_holding && mouse2Down) { PlayLayer::releaseButton(self, 0, false); mouse2Down = false; }
 	}
 }
 
@@ -379,31 +272,12 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 	}
 	else {
 		if (mode == "Record") {
-			if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() == 0) { std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).begin(), 0); }
+			if (CheckpointFrames.size() == 0) CheckpointFrames.push_back(0);
+			
+			Frames.resize(CheckpointFrames.back());
 
-			/*
-			Notation for this because if i get it wrong it fucks me up
-			On death, we go back to the last frame in the checkpoints list
-			Assume that the last item in checkpoints is 1000,
-			We keep calling pop_back on the list until it is less than 1000 because we write the fram on respawn
-			Now the macro should work almost perfectly
-			*/
-
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Xpos"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Ypos"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player1Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Rotation"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<bool>>(Player1Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Pushed"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player1Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player1Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Yvelo"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<bool>>(Player1Data["Dropping"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Dropping"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Dropping"]).pop_back(); } else { break; } };
-
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Xpos"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Ypos"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player2Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Rotation"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<bool>>(Player2Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Pushed"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<float>>(Player2Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player2Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Yvelo"]).pop_back(); } else { break; } };
-			while ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() < (int)(std::get<std::deque<bool>>(Player1Data["Dropping"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Dropping"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Dropping"]).pop_back(); } else { break; } };
-
-			if ((int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back() != 0) { frame = (int)std::get<std::deque<int>>(Player1Data["Checkpoints"]).back(); }
+			
+			if ((int)CheckpointFrames.back() != 0) { frame = (int)CheckpointFrames.back(); }
 			else {
 				frame = 0;
 				maxFrame = 0;
@@ -411,14 +285,8 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 
 			// Practice Fix
 			if (EnablePracticeFix) {
-				if (std::get<std::deque<float>>(Player1Data["Xpos"]).size() != 0) {
-					self->m_pPlayer1->setRotation(std::get<std::deque<float>>(Player1Data["Rotation"]).back());
-					self->m_pPlayer1->m_yAccel = std::get<std::deque<float>>(Player1Data["Yvelo"]).back();
-					self->m_pPlayer1->m_bDropping = std::get<std::deque<bool>>(Player1Data["Dropping"]).back();
-					self->m_pPlayer2->setRotation(std::get<std::deque<float>>(Player2Data["Rotation"]).back());
-					self->m_pPlayer2->m_yAccel = std::get<std::deque<float>>(Player2Data["Yvelo"]).back();
-					self->m_pPlayer2->m_bDropping = std::get<std::deque<bool>>(Player2Data["Dropping"]).back();
-				}
+				if (Checkpoints.size() == 0) return;
+				Checkpoints.back().restore(self);
 			}
 		}
 	}
@@ -441,19 +309,7 @@ bool __fastcall PlayLayer::pushButtonHook(gd::PlayLayer* self, uintptr_t, int st
 		if (waitForFirstClick && !self->m_isPracticeMode) {
 			waitForFirstClick = false;
 			if (!rewinding) {
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Xpos"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Ypos"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player1Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Rotation"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<bool>>(Player1Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Pushed"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player1Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Yvelo"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<bool>>(Player1Data["Dropping"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Dropping"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Dropping"]).pop_back(); } else { break; } };
-
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Xpos"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Ypos"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player2Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Rotation"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<bool>>(Player2Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Pushed"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player2Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Yvelo"]).pop_back(); } else { break; } };
-				while ((int)frame < (int)(std::get<std::deque<bool>>(Player2Data["Dropping"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Dropping"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Dropping"]).pop_back(); } else { break; } };
+				Frames.resize(frame);
 			}
 		}
 	}
@@ -484,22 +340,19 @@ void __fastcall PlayLayer::onQuitHook(gd::PlayLayer* self) {
 
 int __fastcall PlayLayer::createCheckpointHook(gd::PlayLayer* self) {
 	auto ret = PlayLayer::createCheckpoint(self);
-	std::get<std::deque<int>>(Player1Data["Checkpoints"]).insert(std::get<std::deque<int>>(Player1Data["Checkpoints"]).end(), frame);
+	Checkpoints.push_back(Checkpoint::from(self));
+	CheckpointFrames.push_back(frame);
 	return ret;
 }
 
 int __fastcall PlayLayer::removeCheckpointHook(gd::PlayLayer* self) {
 	auto ret = PlayLayer::removeCheckpoint(self);
-	if (std::get<std::deque<int>>(Player1Data["Checkpoints"]).size() > 0) std::get<std::deque<int>>(Player1Data["Checkpoints"]).pop_back();
+	if (Checkpoints.size() > 0) Checkpoints.pop_back();
+	if (CheckpointFrames.size() > 0) CheckpointFrames.pop_back();
 	return ret;
 }
 
 void __fastcall PlayLayer::togglePracticeModeHook(gd::PlayLayer* self, int edx, bool toggle) {
-	if (toggle) {
-		duckFrame = 0;
-		duckFrameTime = 0;
-	}
-
 	return PlayLayer::togglePracticeMode(self, toggle);
 }
 
@@ -509,104 +362,32 @@ bool __fastcall LevelEditorLayer::initHook(gd::LevelEditorLayer* self, int edx, 
 	return true;
 }
 
+std::ostream& operator<<(std::ostream& out, const Frame& frame) {
+	return out.write(reinterpret_cast<const char*>(&frame), sizeof(frame));
+}
+
+std::istream& operator>>(std::istream& in, Frame& frame) {
+	return in.read(reinterpret_cast<char*>(&frame), sizeof(frame));
+}
+
 void PosBot::SaveMacro(std::string macroName) {
 	int val = _mkdir("PosBot");
-	std::fstream myfile;
-	myfile.open("PosBot/" + macroName + ".pbor", std::ios::out);
-	if (myfile.is_open()) {
-		myfile << std::get<std::deque<float>>(Player1Data["Xpos"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(Player1Data["Ypos"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(Player1Data["Rotation"]).size() << "\n";
-		myfile << std::get<std::deque<bool>>(Player1Data["Pushed"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(Player1Data["Yvelo"]).size() << "\n";
-		myfile << std::get<std::deque<bool>>(Player1Data["Dropping"]).size() << "\n";
-		for (float xpos : std::get<std::deque<float>>(Player1Data["Xpos"])) myfile << std::setprecision(10) << std::fixed << xpos << "\n";
-		for (float ypos : std::get<std::deque<float>>(Player1Data["Ypos"])) myfile << std::setprecision(10) << std::fixed << ypos << "\n";
-		for (float rotation : std::get<std::deque<float>>(Player1Data["Rotation"])) myfile << std::setprecision(10) << std::fixed << rotation << "\n";
-		for (bool pushed : std::get<std::deque<bool>>(Player1Data["Pushed"])) myfile << pushed << "\n";
-		for (float yvelo : std::get<std::deque<float>>(Player1Data["Yvelo"])) myfile << std::setprecision(10) << std::fixed << yvelo << "\n";
-		for (bool dropping : std::get<std::deque<bool>>(Player1Data["Dropping"])) myfile << dropping << "\n";
-		
-		myfile << std::get<std::deque<float>>(Player2Data["Xpos"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(Player2Data["Ypos"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(Player2Data["Rotation"]).size() << "\n";
-		myfile << std::get<std::deque<bool>>(Player2Data["Pushed"]).size() << "\n";
-		myfile << std::get<std::deque<float>>(Player2Data["Yvelo"]).size() << "\n";
-		myfile << std::get<std::deque<bool>>(Player2Data["Dropping"]).size() << "\n";
-		for (float xpos : std::get<std::deque<float>>(Player2Data["Xpos"])) myfile << std::setprecision(10) << std::fixed << xpos << "\n";
-		for (float ypos : std::get<std::deque<float>>(Player2Data["Ypos"])) myfile << std::setprecision(10) << std::fixed << ypos << "\n";
-		for (float rotation : std::get<std::deque<float>>(Player2Data["Rotation"])) myfile << std::setprecision(10) << std::fixed << rotation << "\n";
-		for (bool pushed : std::get<std::deque<bool>>(Player2Data["Pushed"])) myfile << pushed << "\n";
-		for (float yvelo : std::get<std::deque<float>>(Player2Data["Yvelo"])) myfile << std::setprecision(10) << std::fixed << yvelo << "\n";
-		for (bool dropping : std::get<std::deque<bool>>(Player2Data["Dropping"])) myfile << dropping << "\n";
-		myfile.close();
-	}
+
+	std::string a = "PosBot/" + macroName + ".pbor";
+	std::ofstream outfile(a.c_str(), std::ios_base::binary);
+	std::copy(Frames.begin(), Frames.end(), std::ostream_iterator<Frame>(outfile));
+	outfile.close();
 }
 
 void PosBot::LoadMacro(std::string macroName) {
-
-	std::fstream myfile;
-	std::string line;
-	myfile.open(("PosBot/" + macroName + ".pbor"), std::ios::in);
-	std::get<std::deque<float>>(Player1Data["Xpos"]).clear();
-	std::get<std::deque<float>>(Player1Data["Ypos"]).clear();
-	std::get<std::deque<float>>(Player1Data["Rotation"]).clear();
-	std::get<std::deque<bool>>(Player1Data["Pushed"]).clear();
-	std::get<std::deque<int>>(Player1Data["Checkpoints"]).clear();
-	std::get<std::deque<float>>(Player1Data["Yvelo"]).clear();
-	std::get<std::deque<bool>>(Player1Data["Dropping"]).clear();
-	
-	std::get<std::deque<float>>(Player2Data["Xpos"]).clear();
-	std::get<std::deque<float>>(Player2Data["Ypos"]).clear();
-	std::get<std::deque<float>>(Player2Data["Rotation"]).clear();
-	std::get<std::deque<bool>>(Player2Data["Pushed"]).clear();
-	std::get<std::deque<float>>(Player2Data["Yvelo"]).clear();
-	std::get<std::deque<bool>>(Player2Data["Dropping"]).clear();
-	
-	if (myfile.is_open()) {
-		getline(myfile, line);
-		int XposLines = stoi(line);
-		getline(myfile, line);
-		int YposLines = stoi(line);
-		getline(myfile, line);
-		int RotationLines = stoi(line);
-		getline(myfile, line);
-		int PushedLines = stoi(line);
-		getline(myfile, line);
-		int YVeloLines = stoi(line);
-		getline(myfile, line);
-		int DroppingLines = stoi(line);
-		for (int lineno = 1; lineno <= XposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Xpos"]).insert(std::get<std::deque<float>>(Player1Data["Xpos"]).end(), stof(line)); }
-		for (int lineno = 1; lineno <= YposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Ypos"]).insert(std::get<std::deque<float>>(Player1Data["Ypos"]).end(), stof(line)); }
-		for (int lineno = 1; lineno <= RotationLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Rotation"]).insert(std::get<std::deque<float>>(Player1Data["Rotation"]).end(), stof(line)); }
-		bool pushed1;
-		for (int lineno = 1; lineno <= PushedLines; lineno++) { getline(myfile, line); std::stringstream(line) >> pushed1; std::get<std::deque<bool>>(Player1Data["Pushed"]).insert(std::get<std::deque<bool>>(Player1Data["Pushed"]).end(), pushed1); }
-		for (int lineno = 1; lineno <= YVeloLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player1Data["Yvelo"]).insert(std::get<std::deque<float>>(Player1Data["Yvelo"]).end(), stof(line)); }
-		bool dropping1;
-		for (int lineno = 1; lineno <= DroppingLines; lineno++) { getline(myfile, line); std::stringstream(line) >> dropping1; std::get<std::deque<bool>>(Player1Data["Dropping"]).insert(std::get<std::deque<bool>>(Player1Data["Dropping"]).end(), dropping1); }
-		
-		getline(myfile, line);
-		XposLines = stoi(line);
-		getline(myfile, line);
-		YposLines = stoi(line);
-		getline(myfile, line);
-		RotationLines = stoi(line);
-		getline(myfile, line);
-		PushedLines = stoi(line);
-		getline(myfile, line);
-		YVeloLines = stoi(line);
-		getline(myfile, line);
-		DroppingLines = stoi(line);
-		for (int lineno = 1; lineno <= XposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Xpos"]).insert(std::get<std::deque<float>>(Player2Data["Xpos"]).end(), stof(line)); }
-		for (int lineno = 1; lineno <= YposLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Ypos"]).insert(std::get<std::deque<float>>(Player2Data["Ypos"]).end(), stof(line)); }
-		for (int lineno = 1; lineno <= RotationLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Rotation"]).insert(std::get<std::deque<float>>(Player2Data["Rotation"]).end(), stof(line)); }
-		bool pushed2;
-		for (int lineno = 1; lineno <= PushedLines; lineno++) { getline(myfile, line); std::stringstream(line) >> pushed2; std::get<std::deque<bool>>(Player2Data["Pushed"]).insert(std::get<std::deque<bool>>(Player2Data["Pushed"]).end(), pushed2); }
-		for (int lineno = 1; lineno <= YVeloLines; lineno++) { getline(myfile, line); std::get<std::deque<float>>(Player2Data["Yvelo"]).insert(std::get<std::deque<float>>(Player2Data["Yvelo"]).end(), stof(line)); }
-		bool dropping2;
-		for (int lineno = 1; lineno <= DroppingLines; lineno++) { getline(myfile, line); std::stringstream(line) >> dropping2; std::get<std::deque<bool>>(Player2Data["Dropping"]).insert(std::get<std::deque<bool>>(Player2Data["Dropping"]).end(), dropping2); }
-		myfile.close();
-	}
+	Frames.clear();
+	Checkpoints.clear();
+	CheckpointFrames.clear();
+	std::string a = "PosBot/" + macroName + ".pbor";
+	std::ifstream infile(a.c_str(), std::ios_base::binary);
+	std::istream_iterator<Frame> iter(infile);
+	std::copy(iter, std::istream_iterator<Frame>(), std::back_inserter(Frames));
+	infile.close();
 }
 
 void __fastcall Extra::dispatchKeyboardMSGHook(void* self, void*, int key, bool down) {
@@ -777,7 +558,7 @@ void PosBot::RenderGUI() {
 	// Render the UI
 	if (showUI) {
 		if (ImGui::Begin("PosBot", nullptr, window_flags)) {
-			ImGui::SetWindowSize("PosBot", ImVec2(421, 443));
+			ImGui::SetWindowSize("PosBot", ImVec2(420, 450));
 			auto pos = ImGui::GetWindowPos();
 			ImGui::Text("PosBot v1.6");
 
@@ -854,9 +635,11 @@ void PosBot::RenderGUI() {
 						ImGui::SetWindowSize(ImVec2(421, 443));
 						ImGui::SetWindowPos(ImVec2(pos.x - 425, pos.y));
 						auto path = "PosBot/";
-						std::deque<std::string>Macros;
+						std::vector<std::string>Macros;
 						for (const auto& file : std::filesystem::directory_iterator(path)) {
-							Macros.insert(Macros.end(), file.path().filename().string());
+							if (file.is_regular_file()) {
+								Macros.insert(Macros.end(), file.path().filename().string());
+							}
 						}
 						for (int i = 0; i <= Macros.size() -1; i++) {
 							if (ImGui::Button(Macros.at(i).c_str(), ImVec2(405, 20))) {
@@ -895,19 +678,17 @@ void PosBot::RenderGUI() {
 
 				// Practice Fix
 				ImGui::Checkbox("Practice Fix", &EnablePracticeFix);
-				ImGui::SameLine();
-
-				// Spinning Duck
-				ImGui::Checkbox("Practice Duck", &EnablePracticeDuck);
-				ImGui::SliderInt("Duck Opacity", &duckOpacity, 0, 100);
 
 				// Fake Clicks Exist
 				std::fstream ClickFile;
 				std::fstream ReleaseFile;
 				ClickFile.open("PosBot/Clicks/Click.wav", std::ios::in);
 				ReleaseFile.open("PosBot/Clicks/Release.wav", std::ios::in);
-				if (ClickFile.is_open() && ReleaseFile.is_open()) ClicksExist = true; else ClicksExist = false;
-				if (!ClicksExist && EnableFakeClicks) { ImGui::NewLine(); ImGui::Text("Clicks do not exist. Put Click.wav and Release.wav in PosBot/Clicks/"); }
+				ClicksExist = ClickFile.is_open() && ReleaseFile.is_open();
+				if (!ClicksExist && EnableFakeClicks) {
+					ImGui::NewLine();
+					ImGui::Text("Clicks do not exist.\nPut Click.wav and Release.wav in PosBot/Clicks/");
+				}
 
 				// Menu keybind button
 				ImGui::NewLine();
@@ -933,8 +714,8 @@ void PosBot::RenderGUI() {
 				if (ImGui::Button("Apply Speed") && !speedhackBtnPressed) {
 					speedhackSpeed = speedhackInputBox;
 					speedhackBtnPressed = true;
-					CCDirector::sharedDirector()->getScheduler()->setTimeScale(speedhackSpeed);
 					SpeedhackAudio::SetSpeedhackAudio(speedhackSpeed);
+					Speedhack::InitializeSpeedHack(speedhackSpeed);
 				}
 				else { speedhackBtnPressed = false; }
 
@@ -949,8 +730,6 @@ void PosBot::RenderGUI() {
 					fpsbypassBtnPressed = true;
 					fpsbypassCap = fpsbypassCapInput;
 					FPSBypass::SetFPS(fpsbypassCap);
-					g_target_fps = fpsbypassCap;
-					g_enabled = true;
 				}
 				else { fpsbypassBtnPressed = false; }
 				ImGui::NewLine();
@@ -975,19 +754,7 @@ void PosBot::RenderGUI() {
 					}
 					ImGui::SameLine();
 					if (ImGui::Button("Confirm")) {
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Xpos"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player1Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Ypos"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player1Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Rotation"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<bool>>(Player1Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Pushed"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player1Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player1Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player1Data["Yvelo"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<bool>>(Player1Data["Dropping"]).size())) { if (std::get<std::deque<bool>>(Player1Data["Dropping"]).size() != 0) { std::get<std::deque<bool>>(Player1Data["Dropping"]).pop_back(); } else { break; } };
-
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Xpos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Xpos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Xpos"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Ypos"]).size())) { if (std::get<std::deque<float>>(Player2Data["Ypos"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Ypos"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Rotation"]).size())) { if (std::get<std::deque<float>>(Player2Data["Rotation"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Rotation"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<bool>>(Player2Data["Pushed"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Pushed"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Pushed"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<float>>(Player2Data["Yvelo"]).size())) { if (std::get<std::deque<float>>(Player2Data["Yvelo"]).size() != 0) { std::get<std::deque<float>>(Player2Data["Yvelo"]).pop_back(); } else { break; } };
-						while ((int)frame < (int)(std::get<std::deque<bool>>(Player2Data["Dropping"]).size())) { if (std::get<std::deque<bool>>(Player2Data["Dropping"]).size() != 0) { std::get<std::deque<bool>>(Player2Data["Dropping"]).pop_back(); } else { break; } };
+						Frames.resize(frame);
 						maxFrame = frame;
 						rewinding = false;
 					}
@@ -1012,7 +779,6 @@ void PosBot::mem_init() {
 	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	std::cout << "PosBot Initiated" << std::endl;
 
-	g_enabled = false;
 	SpeedhackAudio::InitSpeedhackAudio();
 
 	MH_CreateHook(
@@ -1081,12 +847,6 @@ void PosBot::mem_init() {
 		(PVOID)(GetProcAddress(libcocos, "?dispatchKeyboardMSG@CCKeyboardDispatcher@cocos2d@@QAE_NW4enumKeyCodes@2@_N@Z")),
 		Extra::dispatchKeyboardMSGHook,
 		(LPVOID*)&Extra::dispatchKeyboardMSG
-	);
-	
-	MH_CreateHook(
-		(PVOID)(base + 0x205460),
-		PlayLayer::updateVisibilityHook,
-		(LPVOID*)&PlayLayer::updateVisibility
 	);
 	
 	MH_CreateHook(
