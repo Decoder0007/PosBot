@@ -33,4 +33,4 @@
 
 # Visual Studio
 .vs
-/Release
+Release/

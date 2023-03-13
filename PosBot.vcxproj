@@ -537,7 +537,6 @@
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\SlotData.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine-cocos2dx.h" />
     <ClInclude Include="cappuccino-sdk\incl\extensions\spine\spine.h" />
-    <ClInclude Include="Checkpoint.h" />
     <ClInclude Include="imgui\imgui-hook.hpp" />
     <ClInclude Include="imgui\imgui\backends\imgui_impl_opengl3.h" />
     <ClInclude Include="imgui\imgui\backends\imgui_impl_opengl3_loader.h" />
@@ -548,6 +547,7 @@
     <ClInclude Include="imgui\imgui\imstb_rectpack.h" />
     <ClInclude Include="imgui\imgui\imstb_textedit.h" />
     <ClInclude Include="imgui\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\Checkpoint.h" />
     <ClInclude Include="src\FPSBypass.h" />
     <ClInclude Include="src\Frame.h" />
     <ClInclude Include="src\framework.h" />

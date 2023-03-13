@@ -1206,10 +1206,10 @@
     <ClInclude Include="src\Speedhack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Checkpoint.h">
+    <ClInclude Include="src\Frame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Frame.h">
+    <ClInclude Include="src\Checkpoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

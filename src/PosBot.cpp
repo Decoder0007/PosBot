@@ -28,6 +28,15 @@ bool Update = false;
 bool EnableFakeClicks = false;
 bool ClicksExist = false;
 
+// Practice Fix
+bool EnablePracticeFix = false;
+
+// Lock Delta
+bool EnableLockDelta = false;
+
+// Frame Fixes
+bool EnableFrameFixes = false;
+
 // RGB Menu
 bool EnableRGBMenu = false;
 bool EnableRGBMenuPrev = false;
@@ -46,9 +55,6 @@ void* channel;
 float speed;
 bool initialized = false;
 bool EnableSpeedhackAudio = false;
-
-// Practice Fix
-bool EnablePracticeFix = false;
 
 // FPS Bypass
 float fpsbypassCapInput = 60.0f;
@@ -119,8 +125,9 @@ std::vector<Frame> Frames = {};
 void __fastcall Scheduler::updateHook(CCScheduler* self, int, float dt) {
 	if (!EnableFrameAdvance || (EnableFrameAdvance && Update)) {
 		Update = false;
-		float deltaTime = 1 / fpsbypassCap;
-		Scheduler::update(self, deltaTime);
+		float deltaTime = dt;
+		if (EnableLockDelta) deltaTime = 1 / fpsbypassCap;
+		Scheduler::update(self, dt);
 		return;
 	}
 	else return;
@@ -170,10 +177,12 @@ bool __fastcall PlayLayer::initHook(gd::PlayLayer* self, int edx, gd::GJGameLeve
 	return ret;
 }
 
-void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaTime) {
+void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float dt) {
 	if (EnableSpeedhackAudio) { SpeedhackAudio::SetSpeedhackAudio(speedhackSpeed); }
 	else { SpeedhackAudio::SetSpeedhackAudio(1.0f); }
 
+	float deltaTime = dt;
+	if (EnableLockDelta) deltaTime = 1 / fpsbypassCap;
 	PlayLayer::update(self, deltaTime);
 
 	auto director = CCDirector::sharedDirector();
@@ -189,13 +198,16 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 		if (mode == "Record") {
 			if (frame > 0) {
 				if (EnableSpam) {
-
+					if (mouse1Down) PlayLayer::releaseButton(self, 0, true);
+					else PlayLayer::pushButton(self, 0, true);
+					if (mouse2Down) PlayLayer::releaseButton(self, 0, false);
+					else PlayLayer::pushButton(self, 0, false);
 				}
 
 				if (self->m_hasCompletedLevel) return;
-				Frame f = Frame::from(self);
-				if (Frames.size() > frame) Frames.resize(frame);
-				Frames.push_back(f);
+
+				if (Frames.size() < frame) Frames.push_back(Frame::from(self, mouse1Down, mouse2Down));
+				else Frames.at(frame) = Frame::from(self, mouse1Down, mouse2Down);
 			}
 		}
 		else if (mode == "Playback") {
@@ -211,52 +223,51 @@ void __fastcall PlayLayer::updateHook(gd::PlayLayer* self, int edx, float deltaT
 					CCFadeOut* fadeOut = CCFadeOut::create(2.0f);
 					macroComplete->runAction(fadeOut);
 					showedMacroComplete = true;
-					return;
 				}
 			}
 			if (self->m_hasCompletedLevel) return;
-			if (frame != 0 && frame < Frames.size()) {
-				Frames[frame].restore(self);
-				if (Frames.at(frame).p1.is_holding && !mouse1Down) {
+			if (frame != 0) {
+				if (Frames[frame].p1.mouseDown && !mouse1Down) {
+					PlayLayer::pushButton(self, 0, true);
 					mouse1Down = true;
 					if (EnableFakeClicks && ClicksExist) {
-						PlayLayer::pushButton(self, 0, true);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Click.wav");
 					}
 				}
-				
-				if (!Frames[frame].p1.is_holding && mouse1Down) {
+
+				if (!Frames[frame].p1.mouseDown && mouse1Down) {
+					PlayLayer::releaseButton(self, 0, true);
 					mouse1Down = false;
 					if (EnableFakeClicks && ClicksExist) {
-						PlayLayer::releaseButton(self, 0, true);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Release.wav");
 					}
 				}
 				
-				if (Frames[frame].p2.is_holding && !mouse2Down) {
+				if (Frames[frame].p2.mouseDown && !mouse2Down) {
 					mouse2Down = true;
+					PlayLayer::pushButton(self, 0, false);
 					if (EnableFakeClicks && ClicksExist) {
-						PlayLayer::pushButton(self, 0, false);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Click.wav");
 					}
 				}
 				
-				if (!Frames[frame].p2.is_holding && mouse2Down) {
+				if (!Frames[frame].p2.mouseDown && mouse2Down) {
 					mouse2Down = false;
+					PlayLayer::releaseButton(self, 0, false);
 					if (EnableFakeClicks && ClicksExist) {
-						PlayLayer::releaseButton(self, 0, false);
 						gd::GameSoundManager::sharedState()->playSound("PosBot/Clicks/Release.wav");
 					}
 				}
+				Frames[frame].restore(self, EnableFrameFixes);
 			}
 		}
 	}
 	else {
-		Frames[frame].restore(self);
-		if (Frames[frame].p1.is_holding && !mouse1Down) { PlayLayer::pushButton(self, 0, true); mouse1Down = true; }
-		if (!Frames[frame].p1.is_holding && mouse1Down) { PlayLayer::releaseButton(self, 0, true); mouse1Down = false; }
-		if (Frames[frame].p2.is_holding && !mouse2Down) { PlayLayer::pushButton(self, 0, false); mouse2Down = true; }
-		if (!Frames[frame].p2.is_holding && mouse2Down) { PlayLayer::releaseButton(self, 0, false); mouse2Down = false; }
+		Frames[frame].restore(self, EnableFrameFixes);
+		if (Frames[frame].p1.mouseDown && !mouse1Down) { PlayLayer::pushButton(self, 0, true); mouse1Down = true; }
+		if (!Frames[frame].p1.mouseDown && mouse1Down) { PlayLayer::releaseButton(self, 0, true); mouse1Down = false; }
+		if (Frames[frame].p2.mouseDown && !mouse2Down) { PlayLayer::pushButton(self, 0, false); mouse2Down = true; }
+		if (!Frames[frame].p2.mouseDown && mouse2Down) { PlayLayer::releaseButton(self, 0, false); mouse2Down = false; }
 	}
 }
 
@@ -273,16 +284,15 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 	else {
 		if (mode == "Record") {
 			if (CheckpointFrames.size() == 0) CheckpointFrames.push_back(0);
-			
-			Frames.resize(CheckpointFrames.back());
 
-			
-			if ((int)CheckpointFrames.back() != 0) { frame = (int)CheckpointFrames.back(); }
-			else {
-				frame = 0;
-				maxFrame = 0;
-			}
-
+			//Frames.resize(CheckpointFrames.back());
+		}
+		if ((int)CheckpointFrames.back() != 0) { frame = (int)CheckpointFrames.back(); }
+		else {
+			frame = 0;
+			maxFrame = 0;
+		}
+		if (mode == "Record") {
 			// Practice Fix
 			if (EnablePracticeFix) {
 				if (Checkpoints.size() == 0) return;
@@ -290,20 +300,25 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 			}
 		}
 	}
+
+	if (Frames.size() == 0 && mode == "Record") {
+		Frame f = Frame::from(self, mouse1Down, mouse2Down);
+		Frames.push_back(f);
+	}
 }
 
 bool __fastcall PlayLayer::pushButtonHook(gd::PlayLayer* self, uintptr_t, int state, bool player) {
-	if (player) mouse1Down = true;
-	if (!player) mouse2Down = true;
+	mouse1Down = player;
+	mouse2Down = !player;
+
 	if (EnableDualClick) mouse1Down = true; mouse2Down = true;
+
 	if (mode == "Record" || mode == "Disabled") { 
 		if (EnableDualClick) {
 			PlayLayer::pushButton(self, state, false);
 			PlayLayer::pushButton(self, state, true);
 		}
-		else {
-			PlayLayer::pushButton(self, state, player);
-		}
+		else { PlayLayer::pushButton(self, state, player); }
 	}
 	if (mode == "Record") {
 		if (waitForFirstClick && !self->m_isPracticeMode) {
@@ -318,8 +333,8 @@ bool __fastcall PlayLayer::pushButtonHook(gd::PlayLayer* self, uintptr_t, int st
 }
 
 bool __fastcall PlayLayer::releaseButtonHook(gd::PlayLayer* self, uintptr_t, int state, bool player) {
-	if (player) mouse1Down = false;
-	if (!player) mouse2Down = false;
+	mouse1Down = !player;
+	mouse2Down = player;
 	if (EnableDualClick) mouse1Down = false; mouse2Down = false;
 	if (mode == "Record" || mode == "Disabled") {
 		if (EnableDualClick) {
@@ -377,6 +392,39 @@ void PosBot::SaveMacro(std::string macroName) {
 	std::ofstream outfile(a.c_str(), std::ios_base::binary);
 	std::copy(Frames.begin(), Frames.end(), std::ostream_iterator<Frame>(outfile));
 	outfile.close();
+
+	// Json output
+
+	a = "PosBot/" + macroName + ".json";
+	std::fstream jsonOutFile;
+	jsonOutFile.open(a.c_str(), std::ios::out);
+	jsonOutFile << "{\n";
+	int fileFrame = 0;
+	for (Frame const &frame : Frames) {
+		jsonOutFile << "    \"" << fileFrame << "\": {\n";
+
+		jsonOutFile << "        \"p1\": {\n";
+		jsonOutFile << "            \"x_pos\": " << frame.p1.x_pos << ",\n";
+		jsonOutFile << "            \"y_pos\": " << frame.p1.y_pos << ",\n";
+		jsonOutFile << "            \"rotation_x\": " << frame.p1.rotation_x << ",\n";
+		jsonOutFile << "            \"rotation_y\": " << frame.p1.rotation_y << ",\n";
+		jsonOutFile << "            \"is_upside_down\": " << frame.p1.is_upside_down << ",\n";
+		jsonOutFile << "            \"mouseDown\": " << frame.p1.mouseDown << ",\n";
+		jsonOutFile << "        },\n";
+
+		jsonOutFile << "        \"p2\": {\n";
+		jsonOutFile << "            \"x_pos\": " << frame.p2.x_pos << ",\n";
+		jsonOutFile << "            \"y_pos\": " << frame.p2.y_pos << ",\n";
+		jsonOutFile << "            \"rotation_x\": " << frame.p2.rotation_x << ",\n";
+		jsonOutFile << "            \"rotation_y\": " << frame.p2.rotation_y << ",\n";
+		jsonOutFile << "            \"is_upside_down\": " << frame.p2.is_upside_down << ",\n";
+		jsonOutFile << "            \"mouseDown\": " << frame.p2.mouseDown<< ",\n";
+		jsonOutFile << "        }\n";
+		jsonOutFile << "    },\n";
+
+		fileFrame++;
+	}
+	jsonOutFile << "}";
 }
 
 void PosBot::LoadMacro(std::string macroName) {
@@ -678,6 +726,14 @@ void PosBot::RenderGUI() {
 
 				// Practice Fix
 				ImGui::Checkbox("Practice Fix", &EnablePracticeFix);
+				ImGui::SameLine();
+
+				// Lock Delta
+				ImGui::Checkbox("Lock Delta", &EnableLockDelta);
+				ImGui::SameLine();
+
+				// Frame Fixes
+				ImGui::Checkbox("Frame Fixes", &EnableFrameFixes);
 
 				// Fake Clicks Exist
 				std::fstream ClickFile;
@@ -758,6 +814,10 @@ void PosBot::RenderGUI() {
 						maxFrame = frame;
 						rewinding = false;
 					}
+				}
+
+				if (ImGui::Button("Clamp Frames", ImVec2(120, 20))) {
+					Frames.resize(frame);
 				}
 
 				/*

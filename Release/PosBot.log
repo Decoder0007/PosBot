@@ -1,2 +1,21 @@
-﻿  PosBot.vcxproj -> C:\Users\decod\Desktop\PosBot\Release\PosBot.dll
+﻿  PosBot.cpp
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(209,23): warning C4018: '<': signed/unsigned mismatch
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(214,22): warning C4018: '<': signed/unsigned mismatch
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(501,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(502,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(503,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(506,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(507,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(508,85): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(545,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(546,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(547,71): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(692,25): warning C4018: '<=': signed/unsigned mismatch
+C:\Users\decod\Desktop\PosBot\src\PosBot.cpp(788,24): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+LINK : warning LNK4075: ignoring '/INCREMENTAL' due to '/OPT:ICF' specification
+LINK : warning LNK4098: defaultlib 'LIBCMTD' conflicts with use of other libs; use /NODEFAULTLIB:library
+detours.lib(detours.obj) : warning LNK4099: PDB '' was not found with 'detours.lib(detours.obj)' or at ''; linking object as if no debug info
+detours.lib(modules.obj) : warning LNK4099: PDB '' was not found with 'detours.lib(modules.obj)' or at ''; linking object as if no debug info
+detours.lib(disasm.obj) : warning LNK4099: PDB '' was not found with 'detours.lib(disasm.obj)' or at ''; linking object as if no debug info
+  PosBot.vcxproj -> C:\Users\decod\Desktop\PosBot\Release\PosBot.dll
           1 file(s) copied.

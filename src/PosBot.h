@@ -11,10 +11,6 @@
 #include "Frame.h"
 #include <string>
 #include <fstream>
-#include <algorithm>
-#include <iostream>
-#include <iterator>
-#include <vector>
 
 using namespace cocos2d;
 
