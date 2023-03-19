@@ -285,7 +285,7 @@ void __fastcall PlayLayer::resetLevelHook(gd::PlayLayer* self) {
 		if (mode == "Record") {
 			if (CheckpointFrames.size() == 0) CheckpointFrames.push_back(0);
 
-			//Frames.resize(CheckpointFrames.back());
+			Frames.resize(CheckpointFrames.back());
 		}
 		if ((int)CheckpointFrames.back() != 0) { frame = (int)CheckpointFrames.back(); }
 		else {
@@ -497,7 +497,10 @@ void PosBot::RenderGUI() {
 		// Load the colours if they exist otherwise 
 		// use the default ones which are defined
 		// at the top of of the file
-		if (gd::GameManager::sharedState()->getIntGameVariable("posbotcolour0") != 0 || gd::GameManager::sharedState()->getIntGameVariable("posbotcolour1") != 0 || gd::GameManager::sharedState()->getIntGameVariable("posbotcolour2") != 0) {
+		if (	gd::GameManager::sharedState()->getIntGameVariable("posbotcolour0") != 0
+				|| gd::GameManager::sharedState()->getIntGameVariable("posbotcolour1") != 0
+				|| gd::GameManager::sharedState()->getIntGameVariable("posbotcolour2") != 0) {
+
 			LightColour[0] = gd::GameManager::sharedState()->getIntGameVariable("posbotcolour0");
 			LightColour[1] = gd::GameManager::sharedState()->getIntGameVariable("posbotcolour1");
 			LightColour[2] = gd::GameManager::sharedState()->getIntGameVariable("posbotcolour2");
@@ -608,14 +611,13 @@ void PosBot::RenderGUI() {
 		if (ImGui::Begin("PosBot", nullptr, window_flags)) {
 			ImGui::SetWindowSize("PosBot", ImVec2(420, 450));
 			auto pos = ImGui::GetWindowPos();
-			ImGui::Text("PosBot v1.6");
+			ImGui::Text("PosBot v1.7");
 
 			if (!inLevel) {
 				// Do this if you aren't in a level
 				ImGui::Text("Head into a level to start!");
 			}
 			else {
-
 				// Do this if you are
 				// Level name
 				auto levelText = "Level Name:  " + gd::GameManager::sharedState()->getPlayLayer()->m_level->m_sLevelName;
