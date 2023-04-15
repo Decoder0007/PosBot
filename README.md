@@ -1,5 +1,5 @@
 # Please Read
-FPS MULTIPLIER IS A REQUIREMENT FOR BELOW VERSION 1.4 STOP DMING ME BECAUSE ITS BUGGING OUT
+People are having trouble with 1.7 crashing. Please use 1.6 for the time being unless it works for you
 
 # PosBot
 - 100% accurate
